@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web.Script.Serialization;
+
+namespace BF4Bots {
+public sealed class LanInvite {
+ public int Version {get;set;}
+ public string Host {get;set;}
+ public string Leader {get;set;}
+ public DateTime ExpiresUtc {get;set;}
+ public void Validate(){if(Version!=1||!Friends.PrivateIP(Host))throw new InvalidDataException("Convite inválido: use o IPv4 privado do anfitrião na mesma rede.");Friends.Name(Leader);if(ExpiresUtc<=DateTime.UtcNow||ExpiresUtc>DateTime.UtcNow.AddHours(25))throw new InvalidDataException("Convite expirado ou data inválida. Peça um novo convite.");}
+ public string Encode(){Validate();return new JavaScriptSerializer().Serialize(this);}
+ public static LanInvite Decode(string text){if(text==null||text.Length>4096)throw new InvalidDataException("Convite excessivo.");LanInvite invite;try{invite=new JavaScriptSerializer{MaxJsonLength=4096}.Deserialize<LanInvite>(text);}catch(Exception ex){throw new InvalidDataException("Arquivo de convite inválido.",ex);}if(invite==null)throw new InvalidDataException("Convite vazio.");invite.Validate();return invite;}
+}
+public sealed class PartyPlayer {public string Name;public int Team,Squad;}
+public static class Friends {
+ public static bool PrivateIP(string value){IPAddress ip;if(!IPAddress.TryParse(value,out ip)||ip.AddressFamily!=AddressFamily.InterNetwork||ip.ToString()!=value)return false;var b=ip.GetAddressBytes();return b[0]==10||(b[0]==172&&b[1]>=16&&b[1]<=31)||(b[0]==192&&b[1]==168);}
+ public static void Name(string value){if(String.IsNullOrWhiteSpace(value)||value.Length>32||value.Any(c=>Char.IsControl(c)||c=='"'||c=='\\'))throw new InvalidDataException("Use o nome exato do jogador, de 1 a 32 caracteres, sem controles ou aspas.");}
+ public static string[] Addresses(){return NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up&&n.NetworkInterfaceType!=NetworkInterfaceType.Loopback).SelectMany(n=>n.GetIPProperties().UnicastAddresses).Select(a=>a.Address.ToString()).Where(PrivateIP).Distinct().ToArray();}
+ public static List<PartyPlayer> Players(string[] words){int fields,count;if(words.Length<3||words[0]!="OK"||!Int32.TryParse(words[1],out fields)||fields<3||fields>32||words.Length<fields+3||!Int32.TryParse(words[fields+2],out count)||count<0||count>256||words.Length!=fields+3+count*fields)throw new InvalidDataException("Lista de jogadores inválida.");var names=words.Skip(2).Take(fields).ToArray();int name=Array.IndexOf(names,"name"),team=Array.IndexOf(names,"teamId"),squad=Array.IndexOf(names,"squadId");if(name<0||team<0||squad<0)throw new InvalidDataException("Servidor sem campos de time/pelotão.");var result=new List<PartyPlayer>();for(int i=0;i<count;i++){int start=fields+3+i*fields,t,s;if(!Int32.TryParse(words[start+team],out t)||!Int32.TryParse(words[start+squad],out s)||t<0||t>4||s<0||s>32)throw new InvalidDataException("Time/pelotão inválido.");result.Add(new PartyPlayer{Name=words[start+name],Team=t,Squad=s});}if(result.Select(p=>p.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=result.Count)throw new InvalidDataException("Há nomes duplicados. Cada amigo precisa de um nome diferente.");return result;}
+ public static string Reconcile(Func<string[],string[]> command,string leader,string[] guests){Name(leader);foreach(var n in guests)Name(n);var group=new[]{leader}.Concat(guests).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();if(group.Length<2||group.Length>5)throw new InvalidDataException("O grupo deve ter de 2 a 5 nomes diferentes.");var list=Players(command(new[]{"admin.listPlayers","all"}));var anchor=list.FirstOrDefault(p=>String.Equals(p.Name,leader,StringComparison.OrdinalIgnoreCase));if(anchor==null)return "Aguardando o anfitrião entrar na partida: "+leader;
+  if(anchor.Team<1||anchor.Team>2)return "Aguardando o anfitrião escolher um time de combate.";
+  int squad=anchor.Squad;if(squad==0){squad=Enumerable.Range(1,32).Reverse().FirstOrDefault(s=>!list.Any(p=>p.Team==anchor.Team&&p.Squad==s));if(squad==0)return "Sem pelotão vazio. Libere um pelotão e tente novamente.";}
+  var online=list.Where(p=>group.Contains(p.Name,StringComparer.OrdinalIgnoreCase)).ToList();int strangers=list.Count(p=>p.Team==anchor.Team&&p.Squad==squad&&!group.Contains(p.Name,StringComparer.OrdinalIgnoreCase));if(strangers+group.Length>5)return "Pelotão sem espaço para o grupo. O anfitrião deve escolher um pelotão vazio.";
+  foreach(var p in online.Where(p=>p.Team!=anchor.Team||p.Squad!=squad)){try{command(new[]{"admin.movePlayer",p.Name,anchor.Team.ToString(),squad.ToString(),"false"});}catch(InvalidOperationException ex){if(!ex.Message.Contains("PlayerNotDead"))throw;}}
+  var after=Players(command(new[]{"admin.listPlayers","all"}));int together=after.Count(p=>group.Contains(p.Name,StringComparer.OrdinalIgnoreCase)&&p.Team==anchor.Team&&p.Squad==squad);return together==group.Length?"Grupo reunido: "+together+" jogadores • time "+anchor.Team+", pelotão "+squad:"Reunidos "+together+"/"+group.Length+" • aguardando entrada ou próximo renascimento. Não há morte forçada.";
+ }
+ public static void CheckBackend(string host){if(!PrivateIP(host))throw new InvalidDataException("Endereço LAN inválido.");using(var client=new TcpClient()){var pending=client.BeginConnect(host,10040,null,null);try{if(!pending.AsyncWaitHandle.WaitOne(4000))throw new TimeoutException("O anfitrião não respondeu. Confira a mesma rede e Preparar rede local.");client.EndConnect(pending);}finally{pending.AsyncWaitHandle.Close();}}}
+ static void Closed(string root){if(OneClick.At(Path.Combine(root,"bf4_no_drm.exe")).Count>0)throw new InvalidOperationException("Feche o BF4 antes de alterar a conexão. A partida atual foi preservada.");}
+ public static void Accept(string root,LanInvite invite,string player){invite.Validate();Name(player);if(String.Equals(invite.Leader,player,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Escolha um nome diferente do anfitrião.");Closed(root);CheckBackend(invite.Host);OneClick.ReloadOriginal(root);Settings.Save(root,new Dictionary<string,string>{{"BlazeIP",invite.Host},{"UserId",player}});}
+ public static void Host(string root,string ip,Action<string> progress){Closed(root);if(!Addresses().Contains(ip))throw new InvalidDataException("Escolha um IPv4 desta máquina.");var backend=Settings.Read(Path.Combine(root,"Server"));if(Settings.Get(backend,"ClientPort","10040")!="10040")throw new InvalidDataException("Esta integração LAN requer ClientPort 10040.");progress("Verificando a rede privada e preparando regras…");Firewall(root,backend,ip);OneClick.ReloadOriginal(root);progress("Salvando endereço LAN com backup…");Settings.Save(Path.Combine(root,"Server"),new Dictionary<string,string>{{"ServerIP",ip},{"ListenAddress","0.0.0.0"}});Settings.Save(root,new Dictionary<string,string>{{"BlazeIP","127.0.0.1"}});progress("Reiniciando os serviços locais…");OneClick.RestartLan(root,progress);}
+ static string PS(string value){return "'"+value.Replace("'","''")+"'";}
+ static void Firewall(string root,Dictionary<string,string> config,string ip){string backend=Path.Combine(root,"Server\\BF4BlazeServer.exe"),server=Path.Combine(root,"Server\\bf4_Server_Final.exe");var ports=new List<int>();foreach(string key in new[]{"ClientPort","HttpPort","HttpsPort","XmlPort"}){string value=Settings.Get(config,key,"");int p;if(Int32.TryParse(value,out p)&&p>0&&p<65536)ports.Add(p);}foreach(string value in Settings.Get(config,"RedirectorPorts","").Split(',')){int p;if(Int32.TryParse(value,out p)&&p>0&&p<65536)ports.Add(p);}var match=Regex.Match(File.ReadAllText(Path.Combine(root,"Server\\!StartServer.bat")),@"(?im)^set GAMEPORT=(\d+)\s*$");int gamePort;if(!match.Success||!Int32.TryParse(match.Groups[1].Value,out gamePort)||gamePort<1||gamePort>65535)throw new InvalidDataException("Porta do jogo não identificada no script instalado.");string suffix=Config.Hash(Encoding.UTF8.GetBytes(Path.GetFullPath(root).ToLowerInvariant())).Substring(0,12);string script="$ErrorActionPreference='Stop'\r\n$index=(Get-NetIPAddress -AddressFamily IPv4 -IPAddress "+PS(ip)+").InterfaceIndex\r\n$profile=Get-NetConnectionProfile -InterfaceIndex $index\r\nif($profile.NetworkCategory -ne 'Private'){throw 'Sua rede esta como Publica. Em Configurar rede no Windows, marque Privada apenas se esta for sua rede domestica. Depois tente novamente.'}\r\n";
+  string[] programs={backend,server};string[] protocols={"TCP","UDP"};string[] localPorts={String.Join(",",ports.Distinct()),gamePort.ToString()};for(int i=0;i<2;i++){string name="BF4Central-LAN-"+suffix+"-"+i;script+="$old=Get-NetFirewallRule -Name "+PS(name)+" -ErrorAction SilentlyContinue\r\nif($old){$old | Remove-NetFirewallRule}\r\nNew-NetFirewallRule -Name "+PS(name)+" -DisplayName "+PS("BF4 Central LAN "+protocols[i])+" -Direction Inbound -Action Allow -Profile Private -RemoteAddress LocalSubnet -Program "+PS(programs[i])+" -Protocol "+protocols[i]+" -LocalPort "+localPorts[i]+" | Out-Null\r\n";}
+  var info=new ProcessStartInfo("powershell.exe","-NoProfile -NonInteractive -EncodedCommand "+Convert.ToBase64String(Encoding.Unicode.GetBytes(script))){UseShellExecute=false,CreateNoWindow=true,RedirectStandardError=true};using(var p=Process.Start(info)){string error=p.StandardError.ReadToEnd();if(!p.WaitForExit(20000)){p.Kill();throw new TimeoutException("Tempo excedido ao configurar a rede privada.");}if(p.ExitCode!=0)throw new IOException("Não foi possível preparar o firewall. Use a Central como administrador em rede Privada. "+error);}
+ }
+}
+public static partial class OneClick {
+ public static void RestartLan(string root,Action<string> progress){string backend=Path.Combine(root,"Server\\BF4BlazeServer.exe");StopLocalServer(root);foreach(var p in At(backend))CloseVerified(p,backend);PrepareLocal(root,progress);HideHelpers(root);}
+}
+}

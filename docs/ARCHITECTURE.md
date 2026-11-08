@@ -2,6 +2,10 @@
 
 ## Componentes
 
+- Friends.cs: convites LAN validados, preparação de host e reconciliação de pelotão por RCON local.
+- FriendsPanel.cs: aba Amigos, aceite de convite, estado de conexão e monitoramento opt-in por sessão.
+- FriendsTests.cs: expiração, destinos, capacidade, identidade e leitura de confirmação do grupo.
+
 - Central.cs: janela unificada, fluxo de escolha do mapa e administração.
 - Launcher.cs: perfis de bots, backup de INI, temas e editor de comportamento.
 - OneClick.cs: coordenação de início, propriedade de portas, API local e comandos do cliente.

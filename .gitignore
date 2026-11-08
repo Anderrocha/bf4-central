@@ -27,3 +27,4 @@ GPU-backups/
 # Generated UI captures and test reports
 /tests/results/
 
+premium-audit.json

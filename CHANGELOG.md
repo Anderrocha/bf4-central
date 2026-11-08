@@ -44,3 +44,11 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Código atual, manifests, catálogo factual, documentação e testes isolados.
 - Build Windows sem arquivos do jogo e workflow para gerar artefatos.
 - Configurações reais, credenciais, perfis, binários de terceiros e logs locais excluídos.
+# Amigos LAN — 2026-11-08
+
+- Aba Amigos com preparo do anfitrião, convite de 24 horas e conexão do convidado ao backend LAN.
+- Regras de firewall por programa, rede Privada/sub-rede local; RCON e APIs administrativas não são compartilhados.
+- Grupo de até cinco nomes acompanha time/pelotão do anfitrião por RCON, sem morte forçada, com verificação, capacidade e pausa após falhas.
+- Conexão TCP do cliente também é verificada para backend remoto.
+- Testes de convites, validação, mudança de time/pelotão, espera, capacidade e confirmação; teste de dois computadores continua pendente.
+

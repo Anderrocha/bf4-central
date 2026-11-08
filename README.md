@@ -4,7 +4,7 @@ Central local para Windows que reúne início do jogo, perfis de bots e administ
 
 ## Funcionalidades
 
-- Abas Jogo, Bots e desempenho e Servidor.
+- Abas Jogo, Bots e desempenho, Servidor e Amigos na rede local.
 - Início coordenado de backend, servidor e cliente, reaproveitando processos existentes.
 - Identificação do conflito da porta 3216 com o EA App. Somente processos conhecidos e com caminho conferido podem ser encerrados.
 - Início do cliente com -blazeIP 127.0.0.1 -patchSSL e verificação da conexão TCP do processo do jogo ao backend local.
@@ -15,7 +15,11 @@ Central local para Windows que reúne início do jogo, perfis de bots e administ
 - Seleção única entre as listas, alvo explícito e botão dedicado a Operation Locker.
 - Jogo imediato com um único mapa na rotação, evitando requisitos de expansão vindos de mapas não escolhidos.
 
-## Compilar
+## Amigos na mesma rede
+
+A aba **Amigos • rede local** prepara o anfitrião, exporta/importa convites e mantém até cinco jogadores no mesmo time/pelotão enquanto a Central do anfitrião está aberta. A mudança de pelotão pode aguardar renascimento. Consulte [instruções e limites da rede local](docs/AMIGOS-LAN.md). O fluxo ainda requer validação de entrada com dois computadores.
+
+## Compilar o EXE
 
 Requer Windows x64 e compilador do .NET Framework 4.x. Não usa pacotes NuGet.
 
