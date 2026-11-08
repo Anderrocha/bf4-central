@@ -63,6 +63,8 @@ The primary action is Iniciar tudo e jogar. OneClick in src/OneClick.cs owns pro
 
 ### Unified Central
 
+BotMaps owns the mod's declared map/mode compatibility. Available maps default to that policy; a native show-all checkbox reveals the full game catalog with text labels for unconfirmed bots. Loading an unconfirmed choice uses the existing Confirm primitive before mutation. Empty supported-mode lists clear the target instead of retaining a stale selection. Existing rotations and running maps are preserved.
+
 BF4 Central.exe is the user-facing entry point. The three native tabs own Game settings, the existing bot profile editor and Server RCON management. Server edits are staged locally; explicit save includes a snapshot, stale-list guard, readback and best-effort rollback. Current gameplay is never changed by connection/read tests. Native password inputs are masked and have a show/hide control. Single-instance signaling reuses the Central window. Underlying original launcher/backend/server remain installation dependencies and their windows are hidden after startup. Repeated buttons use Central.Button/AsyncButton; all status uses StatusLabel.
 
 ### Friends on LAN

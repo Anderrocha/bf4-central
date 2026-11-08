@@ -59,3 +59,10 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Convidados compatíveis deixam de exigir os arquivos exclusivos de hospedagem do servidor.
 - Testes de bibliotecas VDF, cliente completo/incompleto e convidado sem servidor local.
 
+# Compatibilidade de bots — 2026-11-08
+
+- Separar o catálogo do jogo da declaração de suporte do mod LAN BOT ALPHA v0.2.
+- Mostrar mapas compatíveis por padrão, oferecer o catálogo completo e avisar antes de carregar mapas/modos não confirmados.
+- Identificar Caspian Conquista como não confirmado; preservar o mapa atual e rotações existentes.
+- Testes de política e do filtro da lista. Nenhuma alegação de navegação corrigida em Caspian.
+

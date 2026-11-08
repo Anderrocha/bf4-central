@@ -17,6 +17,8 @@ Central local para Windows que reúne início do jogo, perfis de bots e administ
 
 ## Amigos na mesma rede
 
+Para bots, consulte a [lista de mapas compatíveis](docs/MAPAS-BOTS.md). Caspian Border em Conquista não está no suporte declarado deste mod; a lista de mapas agora prioriza os compatíveis e avisa antes de carregar os demais.
+
 A aba **Amigos • rede local** prepara o anfitrião, exporta/importa convites e mantém até cinco jogadores no mesmo time/pelotão enquanto a Central do anfitrião está aberta. A mudança de pelotão pode aguardar renascimento. Consulte [instruções e limites da rede local](docs/AMIGOS-LAN.md). O fluxo ainda requer validação de entrada com dois computadores.
 
 ## Compilar o EXE
