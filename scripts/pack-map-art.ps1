@@ -10,6 +10,8 @@ try {
         if ($_.Length -gt 2000000) { throw "Imagem excessiva: $($_.Name)" }
         $writer.AddResource($_.BaseName, [object][IO.File]::ReadAllBytes($_.FullName))
     }
+    $banner=Join-Path $projectRoot 'local-assets\banner.jpg'
+    if (Test-Path -LiteralPath $banner) { $writer.AddResource('__banner', [object][IO.File]::ReadAllBytes($banner)) }
     $writer.Generate()
 } finally { $writer.Close() }
 Write-Output $target

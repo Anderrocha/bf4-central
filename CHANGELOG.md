@@ -73,3 +73,9 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Pacote local opcional de imagens embutido no EXE; código compila sem imagens e usa fallback.
 - Capas de 33 mapas localizadas no pacote HTTP já instalado, via backend local. MP_Playground não tem capa disponível. Recursos de jogo não enviados ao GitHub.
 - Testes de seleção/prévia, imagem ausente e renderização com e sem pacote local.
+# 0.4.1 — 2026-11-08
+
+- Banner com a imagem fornecida pelo usuário, incorporado ao pacote de recursos local.
+- Abas maiores com ícones próprios, texto em negrito, seleção escura e sublinhado âmbar.
+- Foco de teclado nativo e layout conferido no tamanho mínimo; navegação e operações preservadas.
+
