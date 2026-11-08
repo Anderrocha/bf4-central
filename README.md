@@ -23,6 +23,12 @@ A aba **Amigos • rede local** prepara o anfitrião, exporta/importa convites e
 
 ## Compilar o EXE
 
+### Miniaturas locais
+
+A seleção de mapas possui miniaturas e uma prévia maior do alvo selecionado. A compilação local pode embutir capas em um único EXE. Coloque JPGs com identificadores de mapa (por exemplo, `MP_Prison.jpg`) em `local-assets/map-images/`, execute `scripts/pack-map-art.ps1` e compile normalmente. `local-assets/` fica fora do Git. As imagens do jogo não são distribuídas neste repositório. Sem esse pacote, o mesmo código compila e mostra placeholders legíveis; a navegação continua funcionando. O EXE não precisa do backend ou da internet para exibir imagens já embutidas.
+
+### Compilação
+
 Requer Windows x64 e compilador do .NET Framework 4.x. Não usa pacotes NuGet.
 
     .\build.cmd

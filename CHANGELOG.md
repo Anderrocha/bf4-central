@@ -66,3 +66,10 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Identificar Caspian Conquista como não confirmado; preservar o mapa atual e rotações existentes.
 - Testes de política e do filtro da lista. Nenhuma alegação de navegação corrigida em Caspian.
 
+# Miniaturas e prévia — 2026-11-08
+
+- Miniaturas de 96×48 na lista de mapas e capa maior acompanhando a seleção de ambas as listas.
+- Nome, modo e suporte de bots legíveis sobre a prévia; compatibilidade substitui o identificador técnico na lista principal.
+- Pacote local opcional de imagens embutido no EXE; código compila sem imagens e usa fallback.
+- Capas de 33 mapas localizadas no pacote HTTP já instalado, via backend local. MP_Playground não tem capa disponível. Recursos de jogo não enviados ao GitHub.
+- Testes de seleção/prévia, imagem ausente e renderização com e sem pacote local.
