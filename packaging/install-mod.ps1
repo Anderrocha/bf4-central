@@ -1,11 +1,13 @@
-param([string]$GameRoot,[switch]$ValidateOnly)
+param([string]$GameRoot,[switch]$ValidateOnly,[string]$PackageRoot=$PSScriptRoot,[switch]$ConfirmInstall)
 $ErrorActionPreference='Stop'
-$source=Join-Path $PSScriptRoot 'Mod'
-$manifest=Join-Path $PSScriptRoot 'SHA256-MOD.txt'
+$source=Join-Path $PackageRoot 'Mod'
+$manifest=Join-Path $PackageRoot 'SHA256-MOD.txt'
 $entries=@(Get-Content -LiteralPath $manifest -Encoding UTF8 | ForEach-Object {
     if($_ -notmatch '^([A-Fa-f0-9]{64})  ([^:]+)$'){throw 'Inventário inválido.'}
     $relative=$Matches[2];$expected=$Matches[1]
     if([IO.Path]::IsPathRooted($relative) -or ($relative -split '[\\/]') -contains '..'){throw 'Caminho fora do pacote.'}
+    $allowed=@('BF4Launcher.exe','bf4_no_drm.exe','dinput8.dll','version.json','config.txt','user.cfg','Server\config.txt','Server\!StartServer.bat','Server\BF4BlazeServer.exe','Server\bf4_Server_Final.exe','Server\bf4_server_Retail.exe','Server\builtLevels.json','Server\dinput8_bf4hook.ini','Server\dinput8.dll','Server\Engine.BuildInfo_Win64_final_Server.dll','Server\GBClient.dll','Server\navigation.bf4pack','Server\ServerOptions.cfg','Server\xinput9_1_0.dll','Server\Instance\Admin\Startup.txt','Server\Instance\Admin\MapList.txt','Server\Scripts\Win32Game.cfg')
+    if($relative -notin $allowed -and $relative -notmatch '^Server\\(?:assets|Data\\DedicatedServer)\\'){throw "Arquivo fora do conjunto do mod: $relative"}
     $path=Join-Path $source $relative
     if(-not (Test-Path -LiteralPath $path -PathType Leaf)){throw "Arquivo ausente: $relative"}
     if((Get-Item -LiteralPath $path).Attributes -band [IO.FileAttributes]::ReparsePoint){throw "Link inesperado: $relative"}
@@ -23,7 +25,7 @@ if(-not (Test-Path -LiteralPath (Join-Path $GameRoot 'bf4.exe') -PathType Leaf))
 if(Get-Process -Name bf4,bf4_no_drm,BF4Launcher,BF4BlazeServer,bf4_Server_Final -ErrorAction SilentlyContinue){throw 'Feche o BF4, o launcher original, o backend e o servidor antes de instalar o mod.'}
 if((Get-Item -LiteralPath $GameRoot).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'A pasta do jogo não pode ser um link de diretório.'}
 Write-Host "Destino: $GameRoot"
-if((Read-Host 'Digite INSTALAR para copiar o mod com backup dos arquivos substituídos') -cne 'INSTALAR'){return}
+if(-not $ConfirmInstall -and (Read-Host 'Digite INSTALAR para copiar o mod com backup dos arquivos substituídos') -cne 'INSTALAR'){return}
 $rng=[Security.Cryptography.RandomNumberGenerator]::Create();$random=New-Object byte[] 24;try{$rng.GetBytes($random)}finally{$rng.Dispose()};$password=[BitConverter]::ToString($random).Replace('-','').ToLowerInvariant()
 $backup=Join-Path $env:LOCALAPPDATA ('BF4BotLauncher\mod-backups\'+(Get-Date -Format yyyyMMdd-HHmmss)+'-'+[Guid]::NewGuid().ToString('N').Substring(0,5))
 $installed=New-Object 'System.Collections.Generic.List[string]'

@@ -79,3 +79,10 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Abas maiores com ícones próprios, texto em negrito, seleção escura e sublinhado âmbar.
 - Foco de teclado nativo e layout conferido no tamanho mínimo; navegação e operações preservadas.
 
+# 0.5.0 — Assistente de preparação
+
+- Cinco etapas com Voltar, Próximo, progresso persistente por instalação e ação de jogar após a validação final.
+- Instalação do mod a partir do pacote local com integridade, backup e script embutido.
+- Detecção de jogo base ainda sem mod e atalho para convidados com cliente já preparado.
+- Testes isolados de bloqueio sem componentes e avanço de 0 a 100%.
+

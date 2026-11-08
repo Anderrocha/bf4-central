@@ -1,5 +1,7 @@
 # Distribuição e reinstalação
 
+Na Central 0.5, a etapa **Instalação** pode verificar a pasta do jogo e instalar o mod diretamente de `02-Mod-privado`. O instalador integrado é o script embutido no EXE; ele não executa scripts da pasta selecionada. Após a instalação, avance por Jogo, Bots, Amigos (opcional) e Servidor. O indicador de 100% confirma arquivos e configuração para iniciar; conexão e entrada na partida são verificadas no início real. O jogo base continua sendo instalado pela biblioteca EA ou Steam.
+
 O pacote de uso pessoal tem três partes: **01-Central** (instalador e EXE portátil), **02-Mod-privado** (componentes do mod para aplicar ao jogo instalado) e **03-Projeto** (fontes, imagens locais, documentação, scripts e testes). O Battlefield 4 base e DLCs são instalados pela EA app ou Steam; não fazem parte deste pacote.
 
 ## Instalar em outro PC

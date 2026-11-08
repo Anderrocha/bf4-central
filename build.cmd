@@ -11,5 +11,5 @@ if "%~1"=="--test" (
   set "BF4_MANIFEST=%~dp0app.manifest"
   set "BF4_OUTPUT=%~dp0dist\BF4 Central.Tests.exe"
 )
-"%BF4_COMPILER%" /nologo /target:winexe /platform:x64 /optimize+ /main:BF4Bots.UnifiedProgram /out:"%BF4_OUTPUT%" /win32manifest:"%BF4_MANIFEST%" /win32icon:"%~dp0resources\central.ico" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Core.dll /reference:System.Management.dll /reference:System.Web.Extensions.dll /resource:"%~dp0resources\maps.json",BF4Bots.Catalog %BF4_ART% "%~dp0src\*.cs"
+"%BF4_COMPILER%" /nologo /target:winexe /platform:x64 /optimize+ /main:BF4Bots.UnifiedProgram /out:"%BF4_OUTPUT%" /win32manifest:"%BF4_MANIFEST%" /win32icon:"%~dp0resources\central.ico" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Core.dll /reference:System.Management.dll /reference:System.Web.Extensions.dll /resource:"%~dp0resources\maps.json",BF4Bots.Catalog %BF4_ART% /resource:"%~dp0packaging\install-mod.ps1",BF4Bots.InstallMod "%~dp0src\*.cs"
 exit /b %ERRORLEVEL%

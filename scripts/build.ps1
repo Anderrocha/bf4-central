@@ -14,6 +14,7 @@ $compilerArgs = @('/nologo', '/target:winexe', '/platform:x64', '/optimize+', '/
 $compilerArgs += "/win32icon:$(Join-Path $projectRoot 'resources\central.ico')"
 $art=Join-Path $projectRoot 'local-assets\maps.resources'
 if (Test-Path -LiteralPath $art) { $compilerArgs += "/resource:$art,BF4Bots.MapArt.resources" }
+$compilerArgs += "/resource:$(Join-Path $projectRoot 'packaging\install-mod.ps1'),BF4Bots.InstallMod"
 & $compiler @compilerArgs @sourceFiles
 if ($LASTEXITCODE -ne 0) { throw "Compilação falhou: $LASTEXITCODE" }
 Write-Output $outputPath
