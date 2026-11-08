@@ -1,0 +1,666 @@
+{
+  "Results": [
+    {
+      "Level": "XP3_WtrFront",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "Chainlink0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP2_004",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CarrierAssaultLarge0",
+            "CarrierAssaultSmall0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP4_SubBase",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "KingOfTheHill0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP5_Night_01",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestDA0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "GunMaster0",
+            "GunMaster1",
+            "Obliteration",
+            "RushLarge0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP3_Prpganda",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "Chainlink0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP0_Metro",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP4_Titan",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "KingOfTheHill0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP2_002",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CarrierAssaultLarge0",
+            "CarrierAssaultSmall0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP3_UrbanGdn",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "Chainlink0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Abandoned",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadConquest0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP2_003",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CarrierAssaultLarge0",
+            "CarrierAssaultSmall0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP4_WlkrFtry",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP3_MarketPl",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "Chainlink0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP1_002",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "AirSuperiority0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP7_Valley",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "AirSuperiority0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Tremors",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Damage",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadDeathMatch3",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Naval",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Playground",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "TutorialMP"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Resort",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP6_CMP",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "Chainlink0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "GunMaster0",
+            "GunMaster1",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadDeathMatch1",
+            "SquadObliteration0",
+            "TeamDeathMatch0",
+            "TeamDeathMatch1"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP1_004",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "AirSuperiority0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_TheDish",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP1_003",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "AirSuperiority0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Siege",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP4_Arctic",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP0_Firestorm",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP0_Caspian",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP2_001",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CarrierAssaultLarge0",
+            "CarrierAssaultSmall0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP0_Oman",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "CaptureTheFlag0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Flooded",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Journey",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "XP1_001",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "AirSuperiority0",
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    },
+    {
+      "Level": "MP_Prison",
+      "Categories": [
+        {
+          "Category": "GameMode",
+          "Mode": [
+            "ConquestLarge0",
+            "ConquestSmall0",
+            "Domination0",
+            "Elimination0",
+            "GunMaster0",
+            "Obliteration",
+            "RushLarge0",
+            "SquadDeathMatch0",
+            "SquadObliteration0",
+            "TeamDeathMatch0"
+          ]
+        }
+      ]
+    }
+  ]
+}

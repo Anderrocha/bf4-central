@@ -1,0 +1,29 @@
+# Generated binaries and local state
+/dist/
+/out/
+/artifacts/
+.vs/
+*.exe
+*.dll
+*.pdb
+*.log
+*.tmp
+*.bak*
+*.cs.txt
+# Game assets and credentials must never be committed
+*.sb
+*.toc
+*.cas
+*.bf4pack
+config.txt
+PROFSAVE*
+GPU-backups/
+**/backups/
+**/performance-backups/
+**/rotation-backups/
+.env
+.env.*
+!.env.example
+# Generated UI captures and test reports
+/tests/results/
+

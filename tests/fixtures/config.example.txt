@@ -1,0 +1,8 @@
+BlazeIP=127.0.0.1
+UserId=JogadorTeste
+AuthCode=fixture-only-not-a-real-account
+ExtraArguments=
+RconHost=127.0.0.1
+RconPort=25210
+RconPassword=fixture-password-not-a-real-secret
+BattlelogUrl=

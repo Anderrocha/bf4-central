@@ -1,0 +1,25 @@
+name: Windows build and tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test isolated fixtures
+        shell: cmd
+        run: .\test.cmd
+      - name: Build application
+        shell: cmd
+        run: .\build.cmd
+      - name: Upload executable and test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bf4-central-windows
+          path: |
+            dist/BF4 Central.exe
+            tests/results/
