@@ -1,5 +1,7 @@
 # BF4 Central
 
+Para empacotar a Central e levar o projeto para outro computador, veja [distribuição e reinstalação](docs/DISTRIBUICAO.md).
+
 Central local para Windows que reúne início do jogo, perfis de bots e administração do servidor de Battlefield 4. O ponto de entrada é um EXE próprio; os componentes do jogo e do mod continuam na instalação local.
 
 ## Funcionalidades
