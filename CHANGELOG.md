@@ -52,3 +52,10 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Conexão TCP do cliente também é verificada para backend remoto.
 - Testes de convites, validação, mudança de time/pelotão, espera, capacidade e confirmação; teste de dois computadores continua pendente.
 
+# Instalação Steam — 2026-11-08
+
+- Detecção do diretório do EXE, pasta lembrada, bibliotecas Steam e bibliotecas de outros discos.
+- Seleção e diagnóstico de pasta quando a instalação não é encontrada; opção `--choose-game`.
+- Convidados compatíveis deixam de exigir os arquivos exclusivos de hospedagem do servidor.
+- Testes de bibliotecas VDF, cliente completo/incompleto e convidado sem servidor local.
+

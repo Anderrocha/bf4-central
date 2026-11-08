@@ -11,6 +11,8 @@ O anfitrião e os convidados precisam estar na mesma rede, ter o BF4/mod compat�
 
 ## Convidado
 
+A instalação pode estar em `SteamLibrary\steamapps\common\Battlefield 4`. A Central atualizada procura bibliotecas Steam e permite selecionar a pasta; o caminho da EA não é obrigatório. O convidado precisa dos componentes do cliente compatível (`config.txt`, `BF4Launcher.exe`, `bf4_no_drm.exe`), mas não precisa hospedar nem possuir os componentes do servidor local. Se só houver a edição padrão da Steam, a tela informa os arquivos ausentes em vez de tentar abrir a pasta da EA.
+
 1. Feche o BF4, abra a mesma Central e escolha **Abrir convite**.
 2. Confira o IP/nome do anfitrião, informe um nome diferente e clique em **Aceitar e abrir o jogo**.
 3. A Central testa TCP 10040, faz backup da configuração, usa o backend do anfitrião e abre o jogo. O convidado não inicia outro servidor local.

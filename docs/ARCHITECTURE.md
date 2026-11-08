@@ -2,6 +2,8 @@
 
 ## Componentes
 
+- InstallPath.cs / InstallPathTests.cs: detecção de bibliotecas Steam, escolha persistente de instalação, diagnóstico do cliente e fixtures sem arquivos de jogo.
+
 - Friends.cs: convites LAN validados, preparação de host e reconciliação de pelotão por RCON local.
 - FriendsPanel.cs: aba Amigos, aceite de convite, estado de conexão e monitoramento opt-in por sessão.
 - FriendsTests.cs: expiração, destinos, capacidade, identidade e leitura de confirmação do grupo.

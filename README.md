@@ -35,6 +35,8 @@ Os testes usam configuração fictícia, servidor RCON simulado e uma raiz tempo
 
 ## Uso com a instalação local
 
+A Central detecta a pasta ao lado do EXE, a última pasta escolhida e bibliotecas Steam (incluindo `libraryfolders.vdf` e outros discos). Se não encontrar um cliente compatível, abre **Localizar instalação** para escolher a pasta e mostrar os componentes ausentes. Use `--choose-game` para escolher outra pasta. A edição padrão da Steam não é convertida automaticamente para este mod offline.
+
 A instalação padrão esperada é C:\Program Files\EA Games\Battlefield 4. Outra pasta pode ser passada com --game "D:\Games\Battlefield 4". São necessários o jogo, suas expansões desejadas e os auxiliares compatíveis já instalados. Este repositório não fornece executáveis, DLLs ou arquivos de jogo de terceiros.
 
 - --play: inicia os componentes e o cliente.
