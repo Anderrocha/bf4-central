@@ -33,3 +33,5 @@ Wi-Fi de convidados/isolamento de clientes pode impedir a conexão. A validaçã
 ## Validação
 
 Testes isolados cobrem convite, expiração, rejeição de destinos públicos/loopback, formato da lista de jogadores, capacidade, ausência de jogadores, idempotência, troca de time/pelotão e confirmação por leitura. A leitura real de jogadores pelo RCON desta instalação foi validada sem mover ninguém. A entrada e o anúncio do endereço LAN ainda precisam de validação com um segundo computador compatível; não foram comprovados apenas pelos testes simulados.
+
+Na preparação local de 08/11/2026, o backend ficou em 0.0.0.0:10040/10041, o jogo em UDP 0.0.0.0:25205 e o RCON permaneceu em 127.0.0.1:25210. Operation Locker foi confirmado ativo por RCON. Essa verificação no anfitrião não substitui a entrada de um amigo em outro computador.

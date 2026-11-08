@@ -109,7 +109,7 @@ public static class Server {
    p.Kill(); if(!p.WaitForExit(10000))throw new IOException("O servidor não encerrou. Não iniciei outro.");
   } else if(Find(root,"bf4_Server_Final.exe").Count>0)throw new InvalidOperationException("O servidor já está aberto.");
   if(Find(root,"BF4BlazeServer.exe").Count==0) {
-   Process.Start(new ProcessStartInfo(Path.Combine(root,"Server\\BF4BlazeServer.exe")){WorkingDirectory=Path.Combine(root,"Server"),WindowStyle=ProcessWindowStyle.Hidden,UseShellExecute=true});
+   Process.Start(new ProcessStartInfo(Path.Combine(root,"Server\\BF4BlazeServer.exe")){WorkingDirectory=Path.Combine(root,"Server"),UseShellExecute=false,CreateNoWindow=true});
    System.Threading.Thread.Sleep(2000);
   }
   ProcessStartInfo info;
@@ -118,7 +118,7 @@ public static class Server {
    string batch=Path.Combine(root,"Server\\!StartServer.bat"); if(!File.Exists(batch))throw new FileNotFoundException("Script de inicialização não encontrado.");
    info=new ProcessStartInfo(Environment.GetEnvironmentVariable("ComSpec"),"/d /c \"\""+batch+"\"\"");
   }
-  info.WorkingDirectory=Path.Combine(root,"Server"); info.UseShellExecute=true; info.WindowStyle=ProcessWindowStyle.Hidden; Process.Start(info);
+  info.WorkingDirectory=Path.Combine(root,"Server"); info.UseShellExecute=false; info.CreateNoWindow=true; Process.Start(info);
  }
 }
 public static class Theme {
