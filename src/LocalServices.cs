@@ -16,5 +16,18 @@ namespace BF4Bots {public static partial class OneClick {
  public static void HideHelpers(string root){var ids=At(Path.Combine(root,"BF4Launcher.exe")).Concat(At(Path.Combine(root,"Server\\BF4BlazeServer.exe"))).Concat(At(Path.Combine(root,"Server\\bf4_Server_Final.exe"))).Select(p=>p.Id).ToArray();EnumWindows((h,s)=>{uint pid;GetWindowThreadProcessId(h,out pid);if(ids.Contains((int)pid))ShowWindowAsync(h,0);return true;},IntPtr.Zero);}
  public static void PrepareLocal(string root,Action<string> progress){var cfg=Settings.Read(root);if(Settings.Get(cfg,"BlazeIP","127.0.0.1")!="127.0.0.1")return;Config.ValidateRoot(root);string backend=Path.Combine(root,"Server\\BF4BlazeServer.exe"),server=Path.Combine(root,"Server\\bf4_Server_Final.exe");var b=File.ReadAllText(Path.Combine(root,"Server\\config.txt"));int bp=Port(b,"ClientPort",10040),rp=Int32.Parse(Settings.Get(cfg,"RconPort","25210"));progress("Preparando backend local…");Ensure(backend,bp,()=>Process.Start(new ProcessStartInfo(backend){WorkingDirectory=Path.Combine(root,"Server"),UseShellExecute=false,CreateNoWindow=true}),progress,30);progress("Preparando servidor local…");Ensure(server,rp,()=>Server.Start(root,null),progress,90);}
  public static void StopLocalServer(string root){string server=Path.Combine(root,"Server\\bf4_Server_Final.exe");foreach(var p in At(server))CloseVerified(p,server);}
+ public static bool IsGameOpen(string root) {
+  return At(Path.Combine(root,"bf4_no_drm.exe")).Count>0;
+ }
+ public static void CloseGameForSwitch(string root) {
+  string game=Path.Combine(root,"bf4_no_drm.exe");
+  foreach(var process in At(game)) {
+   using(process) {
+    if(!SamePath(process.MainModule.FileName,game))throw new IOException("O processo do jogo mudou.");
+    if(!process.CloseMainWindow()||!process.WaitForExit(12000))
+     throw new IOException("Feche o Battlefield 4 pela janela do jogo e tente novamente.");
+   }
+  }
+ }
  public static void ReloadOriginal(string root){string game=Path.Combine(root,"bf4_no_drm.exe");if(At(game).Count>0)throw new InvalidOperationException("Feche o jogo para recarregar o launcher auxiliar.");string launcher=Path.Combine(root,"BF4Launcher.exe");foreach(var p in At(launcher))CloseVerified(p,launcher);}
 }}

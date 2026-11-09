@@ -36,7 +36,25 @@ public static class Friends {
  }
  public static void CheckBackend(string host){if(!PrivateIP(host))throw new InvalidDataException("Endereço LAN inválido.");using(var client=new TcpClient()){var pending=client.BeginConnect(host,10040,null,null);try{if(!pending.AsyncWaitHandle.WaitOne(4000))throw new TimeoutException("O anfitrião não respondeu. Confira a mesma rede e Preparar rede local.");client.EndConnect(pending);}finally{pending.AsyncWaitHandle.Close();}}}
  static void Closed(string root){if(OneClick.At(Path.Combine(root,"bf4_no_drm.exe")).Count>0)throw new InvalidOperationException("Feche o BF4 antes de alterar a conexão. A partida atual foi preservada.");}
- public static void Accept(string root,LanInvite invite,string player){invite.Validate();Name(player);if(String.Equals(invite.Leader,player,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Escolha um nome diferente do anfitrião.");Closed(root);CheckBackend(invite.Host);OneClick.ReloadOriginal(root);Settings.Save(root,new Dictionary<string,string>{{"BlazeIP",invite.Host},{"UserId",player}});}
+ public static void Accept(string root,LanInvite invite,string player) {
+  invite.Validate();
+  Name(player);
+  if(String.Equals(invite.Leader,player,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Escolha um nome diferente do anfitrião.");
+  CheckBackend(invite.Host);
+  SwitchConnection(root,invite.Host,player);
+ }
+ public static void ReturnLocal(string root) {
+  Config.ValidateRoot(root);
+  Settings.Read(Path.Combine(root,"Server"));
+  SwitchConnection(root,"127.0.0.1",null);
+ }
+ static void SwitchConnection(string root,string address,string player) {
+  OneClick.CloseGameForSwitch(root);
+  OneClick.ReloadOriginal(root);
+  var options=new Dictionary<string,string>{{"BlazeIP",address}};
+  if(player!=null)options["UserId"]=player;
+  Settings.Save(root,options);
+ }
  public static void Host(string root,string ip,Action<string> progress){Closed(root);if(!Addresses().Contains(ip))throw new InvalidDataException("Escolha um IPv4 desta máquina.");var backend=Settings.Read(Path.Combine(root,"Server"));if(Settings.Get(backend,"ClientPort","10040")!="10040")throw new InvalidDataException("Esta integração LAN requer ClientPort 10040.");progress("Verificando a rede privada e preparando regras…");Firewall(root,backend,ip);OneClick.ReloadOriginal(root);progress("Salvando endereço LAN com backup…");Settings.Save(Path.Combine(root,"Server"),new Dictionary<string,string>{{"ServerIP",ip},{"ListenAddress","0.0.0.0"}});Settings.Save(root,new Dictionary<string,string>{{"BlazeIP","127.0.0.1"}});progress("Reiniciando os serviços locais…");OneClick.RestartLan(root,progress);}
  static string PS(string value){return "'"+value.Replace("'","''")+"'";}
  static void Firewall(string root,Dictionary<string,string> config,string ip){string backend=Path.Combine(root,"Server\\BF4BlazeServer.exe"),server=Path.Combine(root,"Server\\bf4_Server_Final.exe");var ports=new List<int>();foreach(string key in new[]{"ClientPort","HttpPort","HttpsPort","XmlPort"}){string value=Settings.Get(config,key,"");int p;if(Int32.TryParse(value,out p)&&p>0&&p<65536)ports.Add(p);}foreach(string value in Settings.Get(config,"RedirectorPorts","").Split(',')){int p;if(Int32.TryParse(value,out p)&&p>0&&p<65536)ports.Add(p);}var match=Regex.Match(File.ReadAllText(Path.Combine(root,"Server\\!StartServer.bat")),@"(?im)^set GAMEPORT=(\d+)\s*$");int gamePort;if(!match.Success||!Int32.TryParse(match.Groups[1].Value,out gamePort)||gamePort<1||gamePort>65535)throw new InvalidDataException("Porta do jogo não identificada no script instalado.");string suffix=Config.Hash(Encoding.UTF8.GetBytes(Path.GetFullPath(root).ToLowerInvariant())).Substring(0,12);string script="$ErrorActionPreference='Stop'\r\n$index=(Get-NetIPAddress -AddressFamily IPv4 -IPAddress "+PS(ip)+").InterfaceIndex\r\n$profile=Get-NetConnectionProfile -InterfaceIndex $index\r\nif($profile.NetworkCategory -ne 'Private'){throw 'Sua rede esta como Publica. Em Configurar rede no Windows, marque Privada apenas se esta for sua rede domestica. Depois tente novamente.'}\r\n";
