@@ -86,3 +86,11 @@ Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta impo
 - Detecção de jogo base ainda sem mod e atalho para convidados com cliente já preparado.
 - Testes isolados de bloqueio sem componentes e avanço de 0 a 100%.
 
+# 0.5.1 — Etapas simplificadas
+
+- Instalação valida automaticamente; atalhos de verificação manual e convite foram removidos da primeira etapa.
+- Jogo apresenta somente as opções de conexão e identidade, preservando os argumentos previamente salvos.
+- Modo leve tem seletor visual com estado textual e teclado; Bots não reinicia servidor nem inicia o jogo.
+- Servidor usa Adicionar à lista; carregar mapa selecionado não abre o cliente.
+- Tela final com banner ampliado, ação única de jogar e textos de início vinculados ao progresso real do launcher.
+

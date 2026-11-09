@@ -3,6 +3,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 namespace BF4Bots {
+public sealed class PerformanceSwitch : CheckBox {
+ public PerformanceSwitch(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer,true);Cursor=Cursors.Hand;}
+ protected override void OnPaint(PaintEventArgs e){var g=e.Graphics;g.Clear(BackColor);g.SmoothingMode=SmoothingMode.AntiAlias;int y=(Height-22)/2;using(var brush=new SolidBrush(Checked?Theme.Ink:Theme.Border)){g.FillEllipse(brush,2,y,22,22);g.FillRectangle(brush,13,y,21,22);g.FillEllipse(brush,23,y,22,22);}g.FillEllipse(Brushes.White,Checked?25:4,y+2,18,18);TextRenderer.DrawText(g,"Modo leve • "+(Checked?"Ativado":"Desativado"),Font,new Rectangle(54,0,Math.Max(1,Width-56),Height),Enabled?Theme.Ink:Theme.Muted,TextFormatFlags.VerticalCenter|TextFormatFlags.EndEllipsis);if(Focused)ControlPaint.DrawFocusRectangle(g,ClientRectangle);}
+ protected override void OnCheckedChanged(EventArgs e){base.OnCheckedChanged(e);Invalidate();}
+}
 public sealed class BannerPanel : Panel {
  readonly Image image;
  public BannerPanel(Image image){this.image=image;DoubleBuffered=true;BackColor=Theme.Ink;Dock=DockStyle.Fill;Margin=new Padding(0,0,0,12);}

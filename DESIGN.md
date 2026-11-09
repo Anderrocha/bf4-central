@@ -63,6 +63,8 @@ The primary action is Iniciar tudo e jogar. OneClick in src/OneClick.cs owns pro
 
 ### Unified Central
 
+At 100% the setup wizard switches to a focused finish screen with a larger artwork banner, readiness text and a single Play action. Back returns to Server. Operational launch status is mapped to the finish message; no timed or simulated progress is shown. PerformanceSwitch retains native checkbox state and keyboard behavior while presenting a pill, thumb and explicit Ativado/Desativado text.
+
 SetupWizard extends the native numbered tabs with Installation → Game → Bots → Friends → Server. Its footer owns the progress bar, persistent status, Back and Next. Installation checks required components and invokes only the embedded installer after explicit confirmation. Checkpoints are scoped to the install path; the final Play action appears only after saved configuration passes validation. LAN is optional. The banner, map thumbnails and existing workflows remain in their original owners.
 
 BannerPanel presents the user-selected BF4 key art in a responsive header (32% of the window height, bounded to 220–300px on the Game tab; 130px on operational tabs), with a top-biased crop preserving the soldier's face and a dark gradient supporting the white title. NavigationTabs retains native tab semantics while drawing 210x46 tabs with geometric gamepad, bot, server and friends icons, bold labels, a dark selected surface and amber underline. Native keyboard focus remains visible. Art is optional and bundled only from local-assets/banner.jpg; the same header works on a solid background in source-only builds. Map preview height is 150px to preserve administration space with the larger navigation. Runtime Theme remains the shared visual token owner.
