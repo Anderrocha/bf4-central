@@ -2,6 +2,50 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Botão "Abrir Battlelog" (15/11/2026) — 0.5.10
+
+- Aba Servidor: novo botão "Abrir Battlelog", ao lado de "Salvar conexão". Abre no navegador o Battlelog local do backend do mod (`http://127.0.0.1/bf4/en/`, com menu Soldier: estatísticas, Loadout/Customize, unlocks, medalhas, battlepacks; porta `HttpPort` de `Server\config.txt`). Só fica ativo quando o `BF4BlazeServer` desta instalação está rodando e escutando a porta (conferido a cada 3 s). Login: nome do jogador, senha em branco.
+
+## Jogo ainda carregando não dá mais erro (14/11/2026) — 0.5.9
+
+- Com o BF4 já aberto há menos de 5 minutos e ainda sem conexão com o backend (carregando), a Central espera até 120 s em vez de mostrar "O jogo aberto não está conectado ao backend offline".
+- Com o jogo já aberto, a Central também aplica a separação de núcleos e a tela inteira.
+
+## Núcleos separados entre jogo e bots (14/11/2026) — 0.5.8
+
+- Nova chave na tela final: "Separar núcleos: jogo × bots" (padrão ligada). Com 4 núcleos, o jogo fica nos núcleos 1-3 com prioridade acima do normal, o servidor (IA dos bots) nos núcleos 3-4 e o backend no núcleo 4, com prioridade abaixo do normal. Desligada, tudo volta a usar todos os núcleos com prioridade normal no próximo início. Vale a partir de "Iniciar tudo e jogar". Salva em `%LOCALAPPDATA%\BF4BotLauncher\split-cores.txt`.
+- Cache de mapa: não há ganho em pré-carregar mapas. O conteúdo é compartilhado em ~61 GB de pacotes .cas e o Windows já mantém em RAM o que foi lido. O cache de shaders da NVIDIA já está ativo.
+
+## Chave "Entrar direto na partida" na tela final (14/11/2026) — 0.5.7
+
+- Na tela "Tudo pronto para jogar", uma chave liga/desliga a entrada direta no servidor. Desligada, o BF4 abre na tela de boas-vindas como antes. A escolha fica salva em `%LOCALAPPDATA%\BF4BotLauncher\direct-join.txt` (padrão: ligada).
+
+## Aba Bots: perfil salvo e perfil ativo visíveis (14/11/2026) — 0.5.6
+
+- A aba abre no perfil que está salvo no `dinput8_bf4hook.ini` (antes abria sempre em "Normal", mesmo com outro salvo).
+- O botão do perfil salvo ganha borda verde. A linha de baixo acompanha o botão escolhido: "Difícil • configurado e ativo na partida ✓", "Fácil • não salvo ainda • em uso: Difícil" ou "… salvo; reinicie o servidor para valer na partida".
+- "Ativo na partida" compara a hora em que o servidor aberto iniciou com a última gravação do .ini (a IA dos bots lê o arquivo ao iniciar o servidor). Atualiza a cada 5 s.
+## Entrar direto no servidor e "Conectado" corrigido (14/11/2026) — 0.5.5
+
+- "Iniciar tudo e jogar" agora entra direto no servidor local, sem clicar em "Servidor recente": a Central entra no Battlelog local do backend com o jogador da Central, espera o servidor aparecer na lista (até 90 s), pede a reserva de vaga (`/launcher/prepare`, o mesmo fluxo do botão do Battlelog) e abre o jogo com `-requestState State_ConnectToGameId`. Se algo falhar (login com senha, servidor fora da lista), cai no início normal pelo menu.
+- Etapa "Conectado" corrigida: o backend entrega ao jogo o `ServerIP` da rede (ex.: 192.168.0.8) e a Central só aceitava 127.0.0.1, então a etapa terminava em ✕ mesmo com o jogo conectado. Agora qualquer IP deste PC conta como backend local; espera até 120 s.
+- Tela inteira: a Central não restaura mais a janela do jogo ao focar (isso podia tirar o BF4 da tela inteira). Se o perfil pede tela inteira (`GstRender.FullscreenEnabled 1`) e o jogo aparecer em janela, a Central alterna com Alt+Enter.
+## Idiomas: português, inglês e espanhol (13/11/2026) — 0.5.4
+
+- Seletor de idioma com bandeira no cabeçalho (Brasil, Estados Unidos, Espanha). A escolha fica salva em `%LOCALAPPDATA%\BF4BotLauncher\language.txt`; sem escolha, segue o idioma do Windows.
+- Tradução feita na exibição (`src\Language.cs` + dicionário em `src\Translations.cs`): os textos de origem continuam em português, então o acompanhamento de etapas ✓ não muda. Mensagens montadas em partes são traduzidas por trechos.
+- Seletor próprio no estilo dos botões: pílula arredondada com cores para mouse por cima, clique (âmbar) e aberto; seta que gira; menu arredondado com destaque ao passar o mouse e idioma atual em âmbar com ✓. Também funciona pelo teclado (setas, Enter, Esc).
+- A troca é ao vivo, sem reiniciar: abas, botões, barra de etapas, prévia do mapa, listas, diálogos de confirmação e a janela de localizar instalação.
+- Botões em fileira se alargam quando a tradução não cabe; colunas da conexão RCON ajustadas para "Puerto"/"Contraseña".
+- Teste novo (`LanguageTests`): troca PT→EN→ES→PT pela interface e gera prints `central-en-*.png`, `central-es-*.png` e `language-flags.png`.
+## Refinamento visual (13/11/2026)
+
+- Botões próprios (`ActionButton`) com cantos arredondados e cores distintas para mouse por cima, clique, em andamento (âmbar com indicador girando), concluído (verde ✓) e falha (vermelho ✕).
+- A barra inferior virou um acompanhamento de etapas (`StatusBar`/`StepTracker`): Iniciar tudo, Iniciar servidor local e Carregar mapa mostram cada etapa, e o ✓ só aparece quando a etapa seguinte começa ou a operação termina com sucesso. Em caso de falha, a etapa ativa fica marcada com ✕ e as seguintes continuam pendentes.
+- A tela final "Tudo pronto para jogar" mostra as mesmas etapas durante o início.
+- A troca de mapa agora informa a conexão RCON, a gravação da rotação e a confirmação do mapa.
+- Correções de layout: a primeira fileira da aba Servidor não fica mais cortada, o texto "Adicionar →" não é truncado e a prévia do mapa se adapta ao tamanho mínimo da janela.
+
 ## Central unificada e prioridade de Operation Locker
 
 - Interface única com jogo, bots e gerenciamento RCON.
