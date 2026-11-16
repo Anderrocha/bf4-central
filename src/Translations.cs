@@ -286,6 +286,8 @@ public static partial class L {
 "Abrir Battlelog","Open Battlelog","Abrir Battlelog",
 "Ajude o projeto a evoluir: participe e concorra a prêmios.","Help the project grow: join in and compete for prizes.","Ayuda al proyecto a crecer: participa y compite por premios.",
 "Ir para o site","Go to the website","Ir al sitio",
+"O Battlefield 4 foi fechado. Clique em Iniciar tudo e jogar para entrar de novo.","Battlefield 4 was closed. Click Start everything and play to join again.","Battlefield 4 se cerró. Haz clic en Iniciar todo y jugar para entrar de nuevo.",
+"Você saiu da partida. O jogo continua aberto; entre de novo pelo menu do BF4 ou clique em Iniciar tudo e jogar.","You left the match. The game is still open; join again from the BF4 menu or click Start everything and play.","Saliste de la partida. El juego sigue abierto; entra de nuevo desde el menú de BF4 o haz clic en Iniciar todo y jugar.",
 "O Battlelog local só abre com o servidor offline no ar. Clique em Iniciar servidor local.","The local Battlelog only opens while the offline server is running. Click Start local server.","El Battlelog local solo se abre con el servidor offline activo. Haz clic en Iniciar servidor local.",
 "Battlelog local aberto no navegador. Para entrar, use o seu nome de jogador e deixe a senha em branco.","Local Battlelog opened in the browser. To sign in, use your player name and leave the password blank.","Battlelog local abierto en el navegador. Para entrar, usa tu nombre de jugador y deja la contraseña en blanco.",
 "Conexão salva com backup.","Connection saved with a backup.","Conexión guardada con copia de seguridad.",

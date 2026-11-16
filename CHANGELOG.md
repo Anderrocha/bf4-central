@@ -2,6 +2,12 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Etapas somem ao sair da partida (15/11/2026) — 0.5.12
+
+- Depois de "Iniciar tudo e jogar" terminar com "Conectado", a Central confere a cada 5 s se o BF4 continua aberto e se o nome do jogador está na lista de jogadores do servidor (RCON `admin.listPlayers`).
+- Saiu da partida (depois de ter sido visto nela): as etapas saem da barra e aparece "Você saiu da partida…". Fechou o jogo: as etapas saem e aparece "O Battlefield 4 foi fechado…".
+- Sem RCON disponível, só o fechamento do jogo é detectado. Se outra operação trocar as etapas (ex.: carregar mapa), o acompanhamento para.
+
 ## Cartão do Sócio Premiado na tela final (15/11/2026) — 0.5.11
 
 - Tela "Tudo pronto para jogar": cartão com a imagem do projeto Sócio Premiado, o convite "Ajude o projeto a evoluir: participe e concorra a prêmios.", o link `sociopremiado.com.br` e o botão "Ir para o site" (imagem, link e botão abrem https://sociopremiado.com.br/ no navegador). Imagem embutida em `resources\socio-premiado.png`. O banner da tela final ficou mais baixo para caber o cartão.
