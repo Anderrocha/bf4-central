@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Cartão do Sócio Premiado na tela final (15/11/2026) — 0.5.11
+
+- Tela "Tudo pronto para jogar": cartão com a imagem do projeto Sócio Premiado, o convite "Ajude o projeto a evoluir: participe e concorra a prêmios.", o link `sociopremiado.com.br` e o botão "Ir para o site" (imagem, link e botão abrem https://sociopremiado.com.br/ no navegador). Imagem embutida em `resources\socio-premiado.png`. O banner da tela final ficou mais baixo para caber o cartão.
+
 ## Botão "Abrir Battlelog" (15/11/2026) — 0.5.10
 
 - Aba Servidor: novo botão "Abrir Battlelog", ao lado de "Salvar conexão". Abre no navegador o Battlelog local do backend do mod (`http://127.0.0.1/bf4/en/`, com menu Soldier: estatísticas, Loadout/Customize, unlocks, medalhas, battlepacks; porta `HttpPort` de `Server\config.txt`). Só fica ativo quando o `BF4BlazeServer` desta instalação está rodando e escutando a porta (conferido a cada 3 s). Login: nome do jogador, senha em branco.

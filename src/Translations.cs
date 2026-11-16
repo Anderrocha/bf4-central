@@ -284,6 +284,8 @@ public static partial class L {
 "Desconectar painel","Disconnect panel","Desconectar panel",
 "Salvar conexão","Save connection","Guardar conexión",
 "Abrir Battlelog","Open Battlelog","Abrir Battlelog",
+"Ajude o projeto a evoluir: participe e concorra a prêmios.","Help the project grow: join in and compete for prizes.","Ayuda al proyecto a crecer: participa y compite por premios.",
+"Ir para o site","Go to the website","Ir al sitio",
 "O Battlelog local só abre com o servidor offline no ar. Clique em Iniciar servidor local.","The local Battlelog only opens while the offline server is running. Click Start local server.","El Battlelog local solo se abre con el servidor offline activo. Haz clic en Iniciar servidor local.",
 "Battlelog local aberto no navegador. Para entrar, use o seu nome de jogador e deixe a senha em branco.","Local Battlelog opened in the browser. To sign in, use your player name and leave the password blank.","Battlelog local abierto en el navegador. Para entrar, usa tu nombre de jugador y deja la contraseña en blanco.",
 "Conexão salva com backup.","Connection saved with a backup.","Conexión guardada con copia de seguridad.",
