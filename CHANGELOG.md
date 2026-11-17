@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Aviso quando outra Central está aberta (17/11/2026) — 0.5.15
+
+- Se outra BF4 Central já estiver aberta para a mesma instalação do jogo (por exemplo, uma versão antiga em outra pasta), a nova mostra a versão e o caminho da outra e oferece fechá-la e abrir a nova. Antes, a nova fechava em silêncio e a antiga continuava na tela.
+- Pacote completo: o instalador fecha Centrais abertas, corrige atalhos que apontam para cópias antigas, avisa sobre cópias soltas e confere a versão instalada.
+
 ## Um som por vez entre a aba Servidor e a tela final (17/11/2026) — 0.5.14
 
 - Ir para a tela final para a música do mapa antes da intro; voltar para a aba Servidor para a intro e retoma a música do mapa escolhido. Antes as duas tocavam juntas.
