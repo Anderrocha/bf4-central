@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Jogo achado também pela EA App e Origin (17/11/2026) — 0.5.16
+
+- A busca da pasta do jogo agora lê o "Install Dir" que a EA App e a Origin gravam no registro (EA Games\Battlefield 4) e procura pastas comuns em todos os discos (Program Files\EA Games, Origin Games, EA Games, Games, Jogos), além das bibliotecas da Steam. Antes, fora da Steam, só a pasta padrão C:\Program Files\EA Games era tentada.
+
 ## Aviso quando outra Central está aberta (17/11/2026) — 0.5.15
 
 - Se outra BF4 Central já estiver aberta para a mesma instalação do jogo (por exemplo, uma versão antiga em outra pasta), a nova mostra a versão e o caminho da outra e oferece fechá-la e abrir a nova. Antes, a nova fechava em silêncio e a antiga continuava na tela.

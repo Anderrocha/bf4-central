@@ -80,10 +80,10 @@ public static partial class L {
 "Compatibilidade da instalação","Installation compatibility","Compatibilidad de la instalación",
 "Usar esta pasta","Use this folder","Usar esta carpeta",
 "Pasta do BF4 localizada. O assistente verificará o cliente e poderá instalar o mod do seu pacote local.","BF4 folder found. The assistant will check the client and can install the mod from your local package.","Carpeta de BF4 encontrada. El asistente verificará el cliente y podrá instalar el mod desde tu paquete local.",
-"Selecione a pasta do jogo. As bibliotecas Steam são procuradas automaticamente.","Select the game folder. Steam libraries are searched automatically.","Selecciona la carpeta del juego. Las bibliotecas de Steam se buscan automáticamente.",
+"Selecione a pasta do jogo. EA App, Origin e bibliotecas Steam são procuradas automaticamente.","Select the game folder. EA App, Origin and Steam libraries are searched automatically.","Selecciona la carpeta del juego. EA App, Origin y las bibliotecas de Steam se buscan automáticamente.",
 "Pasta selecionada: ","Selected folder: ","Carpeta seleccionada: ",
 "\r\n\r\nComponentes do cliente offline não encontrados: ","\r\n\r\nOffline client components not found: ","\r\n\r\nComponentes del cliente offline no encontrados: ",
-".\r\n\r\nSelecione a pasta do BF4 instalado pela EA ou Steam, que contém bf4.exe.",".\r\n\r\nSelect the BF4 folder installed through EA or Steam, which contains bf4.exe.",".\r\n\r\nSelecciona la carpeta de BF4 instalada desde EA o Steam, que contiene bf4.exe.",
+".\r\n\r\nSelecione a pasta do BF4 instalado pela EA App, Origin ou Steam, que contém bf4.exe.",".\r\n\r\nSelect the BF4 folder installed through EA App, Origin or Steam, which contains bf4.exe.",".\r\n\r\nSelecciona la carpeta de BF4 instalada desde EA App, Origin o Steam, que contiene bf4.exe.",
 // Etapa 2 — Jogo
 "Servidor Blaze / IP","Blaze server / IP","Servidor Blaze / IP",
 "Nome do jogador","Player name","Nombre del jugador",
