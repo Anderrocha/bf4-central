@@ -62,9 +62,9 @@ public static partial class OneClick {
   var masks=CoreMasks(Math.Min(Environment.ProcessorCount,62));if(masks==null)return null;bool on=SplitCoresEnabled;
   Action<Process,long,ProcessPriorityClass> set=(p,mask,priority)=>{try{p.Refresh();if(p.HasExited)return;p.ProcessorAffinity=(IntPtr)mask;p.PriorityClass=priority;}catch{}};
   set(game,on?masks[0]:masks[3],on?ProcessPriorityClass.AboveNormal:ProcessPriorityClass.Normal);
-  foreach(var s in At(Path.Combine(root,"Server\\bf4_Server_Final.exe")))set(s,on?masks[1]:masks[3],ProcessPriorityClass.Normal);
+  // O servidor decide os acertos e roda a IA: mesma prioridade do jogo, para não esperar no núcleo dividido.
   foreach(var b in At(Path.Combine(root,"Server\\BF4BlazeServer.exe")))set(b,on?masks[2]:masks[3],on?ProcessPriorityClass.BelowNormal:ProcessPriorityClass.Normal);
-  return on?"Núcleos separados: jogo com prioridade; servidor e bots nos últimos núcleos.":null;
+  return on?"Núcleos separados: jogo e servidor com a mesma prioridade; servidor e bots nos últimos núcleos.":null;
  }
 
  // ---------- Entrada direta pelo Battlelog local ----------

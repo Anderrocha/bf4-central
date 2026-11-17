@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Servidor com a mesma prioridade do jogo (18/11/2026) — 0.5.17
+
+- Com "Separar núcleos" ligado, o servidor (bf4_Server_Final: acertos, kills e IA dos bots) passa a ter prioridade acima do normal, igual ao jogo. Antes ele ficava em prioridade normal e perdia o núcleo 3 para o jogo, ficando quase só no núcleo 4: o kill chegava atrasado e os mapas abertos atrasavam. Medido: o servidor ocupa 99% de um núcleo mesmo sem partida.
+
 ## Jogo achado também pela EA App e Origin (17/11/2026) — 0.5.16
 
 - A busca da pasta do jogo agora lê o "Install Dir" que a EA App e a Origin gravam no registro (EA Games\Battlefield 4) e procura pastas comuns em todos os discos (Program Files\EA Games, Origin Games, EA Games, Games, Jogos), além das bibliotecas da Steam. Antes, fora da Steam, só a pasta padrão C:\Program Files\EA Games era tentada.
