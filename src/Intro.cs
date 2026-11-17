@@ -40,7 +40,9 @@ public sealed partial class Central {
  BannerPanel bannerPanel;IntroPlayer intro;
  void IntroOnFinal(bool show){
   if(bannerPanel==null)return;if(intro==null){intro=new IntroPlayer(bannerPanel);FormClosed+=(s,e)=>intro.Dispose();}
-  if(show&&IntroPlayer.Available)intro.Play(MapMusic.Enabled);else intro.Stop();
+  // Um som por vez: a tela final cala a música do mapa; ao voltar, a intro para e a música do mapa volta.
+  if(show){MapMusic.Stop();if(IntroPlayer.Available)intro.Play(MapMusic.Enabled);}
+  else{intro.Stop();MusicFor(selectedChoice);}
  }
 }
 }

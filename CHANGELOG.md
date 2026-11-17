@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Um som por vez entre a aba Servidor e a tela final (17/11/2026) — 0.5.14
+
+- Ir para a tela final para a música do mapa antes da intro; voltar para a aba Servidor para a intro e retoma a música do mapa escolhido. Antes as duas tocavam juntas.
+
 ## Intro do BF4 no banner da tela final (17/11/2026) — 0.5.13
 
 - Ao abrir a tela "Tudo pronto para jogar", o banner toca a intro do Battlefield 4 (15 s, a partir do fim dos logos), com som, e para no último quadro: a arte do Battlefield 4. O som segue a caixa "Música do mapa".
