@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Intro do BF4 no banner da tela final (17/11/2026) — 0.5.13
+
+- Ao abrir a tela "Tudo pronto para jogar", o banner toca a intro do Battlefield 4 (15 s, a partir do fim dos logos), com som, e para no último quadro: a arte do Battlefield 4. O som segue a caixa "Música do mapa".
+- Quadros (24 por segundo) e som ficam em `%LOCALAPPDATA%\BF4BotLauncher\intro\` (`intro.bin` + `intro.mp3`), gerados neste PC a partir do vídeo do usuário. Não vão para o repositório; sem a pasta, o banner continua com a imagem fixa.
+
 ## Música de abertura de cada mapa (17/11/2026) — 0.5.13
 
 - Aba Servidor: ao escolher um mapa na lista (ou na rotação), toca a música de abertura daquele mapa; trocar de mapa troca a música. Caixa "Música do mapa" liga/desliga (salva em `%LOCALAPPDATA%\BF4BotLauncher\map-music.txt`). A música para ao sair da aba Servidor, ao clicar em "Iniciar tudo e jogar" e ao fechar a Central.
