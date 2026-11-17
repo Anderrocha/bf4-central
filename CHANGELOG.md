@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Música de abertura de cada mapa (17/11/2026) — 0.5.13
+
+- Aba Servidor: ao escolher um mapa na lista (ou na rotação), toca a música de abertura daquele mapa; trocar de mapa troca a música. Caixa "Música do mapa" liga/desliga (salva em `%LOCALAPPDATA%\BF4BotLauncher\map-music.txt`). A música para ao sair da aba Servidor, ao clicar em "Iniciar tudo e jogar" e ao fechar a Central.
+- As músicas são lidas de `%LOCALAPPDATA%\BF4BotLauncher\music\<IdDoMapa>.mp3`, extraídas do jogo instalado neste PC (faixas `..._music_loading_..._wave` dos pacotes de cada mapa, convertidas com vgmstream e ffmpeg). Por serem conteúdo da EA, não ficam no repositório. Sem a pasta, a caixa fica desativada.
+
 ## Etapas somem ao sair da partida (15/11/2026) — 0.5.12
 
 - Depois de "Iniciar tudo e jogar" terminar com "Conectado", a Central confere a cada 5 s se o BF4 continua aberto e se o nome do jogador está na lista de jogadores do servidor (RCON `admin.listPlayers`).
