@@ -59,7 +59,9 @@ public static partial class OneClick {
   return new[]{all&~last,last|beforeLast,last,all};
  }
  public static string ApplyCores(string root,Process game){
-  var masks=CoreMasks(Math.Min(Environment.ProcessorCount,62));if(masks==null)return null;bool on=SplitCoresEnabled;
+  var masks=CoreMasks(Math.Min(Environment.ProcessorCount,62));if(masks==null)return null;
+  // Servidor em outro PC (nenhum servidor local aberto): o jogo fica com todos os núcleos.
+  bool on=SplitCoresEnabled&&At(Path.Combine(root,"Server\\bf4_Server_Final.exe")).Count>0;
   Action<Process,long,ProcessPriorityClass> set=(p,mask,priority)=>{try{p.Refresh();if(p.HasExited)return;p.ProcessorAffinity=(IntPtr)mask;p.PriorityClass=priority;}catch{}};
   set(game,on?masks[0]:masks[3],on?ProcessPriorityClass.AboveNormal:ProcessPriorityClass.Normal);
   // O servidor decide os acertos e roda a IA: mesma prioridade do jogo, para não esperar no núcleo dividido.

@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Servidor em outro PC: painel "BF4 Servidor" (18/11/2026) — 0.5.18
+
+- Novo programa `servidor\ServidorPainel.cs` (`dist\BF4 Servidor.exe`, `servidor\build.cmd`): painel para um segundo PC da rede com um botão Ligar/Desligar. No primeiro uso libera o backend e o servidor no firewall (rede privada); a cada ligação grava o IP do PC no `Server\config.txt` (ServerIP), liga o backend, depois o servidor com bots (parâmetros lidos do `!StartServer.bat`), tudo sem janelas, e mostra o IP para usar na Central. Opção "Modo leve" (prioridade baixa).
+- Central: sem servidor local aberto (servidor em outro PC), "Separar núcleos" não limita o jogo, que fica com todos os núcleos.
+
 ## Servidor com a mesma prioridade do jogo (18/11/2026) — 0.5.17
 
 - Com "Separar núcleos" ligado, o servidor (bf4_Server_Final: acertos, kills e IA dos bots) passa a ter prioridade acima do normal, igual ao jogo. Antes ele ficava em prioridade normal e perdia o núcleo 3 para o jogo, ficando quase só no núcleo 4: o kill chegava atrasado e os mapas abertos atrasavam. Medido: o servidor ocupa 99% de um núcleo mesmo sem partida.
