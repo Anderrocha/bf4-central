@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Lista de servidores e entrada direta no PC servidor (18/11/2026) — Central 0.5.21 / painel 0.5.22
+- Painel: antes de ligar o servidor espera todas as portas do backend; depois de ligar confere a lista do Battlelog do backend ("Nenhum servidor encontrado") e, se o servidor não se registrou em 75 s, reinicia só o servidor (uma vez).
+- Painel: comando LOGS pela rede (só leitura) com o final dos logs do backend/servidor, para diagnóstico a partir do PC de jogo.
+- Central: "Entrar direto na partida" também funciona com o PC servidor (login e preparo pelo Battlelog do IP privado do PC servidor; antes era só 127.0.0.1).
+
 ## Controle remoto do servidor (18/11/2026) — painel 0.5.21
 - O servidor do BF4 só aceita o RCON (25210) de dentro do próprio PC; a Central do PC de jogo ficava presa em "Conectando ao servidor por RCON".
 - Painel agora repassa o RCON: escuta na TCP 25212 da rede e encaminha para 127.0.0.1:25210. O "pronto" do pedido devolve a porta 25212, que a Central grava como RconPort. Regra de firewall nova (versão v3).

@@ -71,10 +71,11 @@ public static partial class OneClick {
 
  // ---------- Entrada direta pelo Battlelog local ----------
  class LocalWeb {
-  readonly CookieContainer cookies=new CookieContainer();readonly string origin;
-  public LocalWeb(int port){origin="http://127.0.0.1"+(port==80?"":":"+port);}
+  readonly CookieContainer cookies=new CookieContainer();readonly string origin,host;
+  // host: 127.0.0.1 ou o IP privado do PC servidor da rede (modo "PC servidor").
+  public LocalWeb(string host,int port){IPAddress ip;if(!IPAddress.TryParse(host,out ip)||!(IPAddress.IsLoopback(ip)||Friends.PrivateIP(host)))throw new InvalidOperationException("Battlelog só no próprio PC ou na rede de casa.");this.host=host;origin="http://"+host+(port==80?"":":"+port);}
   public string Send(string path,string method,string form,out int status){
-   var uri=new Uri(origin+path);if(uri.Host!="127.0.0.1"||uri.Scheme!="http")throw new InvalidOperationException("O Battlelog local aceita somente 127.0.0.1.");
+   var uri=new Uri(origin+path);if(uri.Host!=host||uri.Scheme!="http")throw new InvalidOperationException("Endereço do Battlelog inesperado.");
    var req=(HttpWebRequest)WebRequest.Create(uri);req.Proxy=null;req.Method=method;req.Timeout=8000;req.ReadWriteTimeout=8000;req.AllowAutoRedirect=true;req.CookieContainer=cookies;req.Accept="application/json, text/html";
    if(form!=null){var bytes=Encoding.UTF8.GetBytes(form);req.ContentType="application/x-www-form-urlencoded";req.ContentLength=bytes.Length;using(var s=req.GetRequestStream())s.Write(bytes,0,bytes.Length);}
    HttpWebResponse response;try{response=(HttpWebResponse)req.GetResponse();}catch(WebException ex){if(ex.Response==null)throw;response=(HttpWebResponse)ex.Response;}
@@ -91,13 +92,13 @@ public static partial class OneClick {
  }
  static string Str(Dictionary<string,object> d,string key){object v;return d!=null&&d.TryGetValue(key,out v)&&v!=null?Convert.ToString(v):"";}
  // Devolve a linha de comando que entra direto no servidor local, ou null para usar o início normal.
- public static string DirectJoinCommand(string root,string cfg,Action<string> progress,out Action release){
+ public static string DirectJoinCommand(string root,string cfg,Action<string> progress,out Action release,string host="127.0.0.1"){
   release=null;
   try{
-   string backendCfg=File.ReadAllText(Path.Combine(root,"Server\\config.txt"));int http=Port(backendCfg,"HttpPort",80);
+   bool local=host=="127.0.0.1";int http=local?Port(File.ReadAllText(Path.Combine(root,"Server\\config.txt")),"HttpPort",80):80;
    string user=Value(cfg,"UserId","");if(user.Length==0)return null;
-   var web=new LocalWeb(http);int status;
-   progress("Preparando o launcher: entrando no Battlelog local…");
+   var web=new LocalWeb(host,http);int status;
+   progress(local?"Preparando o launcher: entrando no Battlelog local…":"Preparando o launcher: entrando no Battlelog do PC servidor…");
    web.Send("/bf4/en/login/","POST",Form("username",user,"password",""),out status);
    string server=null;Dictionary<string,object> config=null;var watch=Stopwatch.StartNew();
    progress("Preparando o launcher: aguardando o servidor aparecer na lista…");

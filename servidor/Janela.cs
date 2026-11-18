@@ -50,7 +50,7 @@ public sealed class Painel : Form {
   Resize+=(s,e)=>{if(WindowState==FormWindowState.Minimized&&accept.Checked){Hide();tray.ShowBalloonTip(3000,"BF4 Servidor","O painel continua aqui, esperando pedidos da Central.",ToolTipIcon.Info);}};
   FormClosing+=OnClosing;
   timer=new System.Windows.Forms.Timer{Interval=2000};timer.Tick+=(s,e)=>Refresh2();timer.Start();
-  pedidos.Accepting=accept.Checked;pedidos.Log=t=>Say(t,Theme.Ink);pedidos.State=()=>state.Text;pedidos.Ask=AskOwner;pedidos.StartServer=StartForRequest;pedidos.StopIfOurs=StopForRelease;
+  pedidos.Accepting=accept.Checked;pedidos.Log=t=>Say(t,Theme.Ink);pedidos.State=()=>state.Text;pedidos.Logs=engine.LogTail;pedidos.Ask=AskOwner;pedidos.StartServer=StartForRequest;pedidos.StopIfOurs=StopForRelease;
   Load+=(s,e)=>Boot();
   Refresh2();
   if(!Directory.Exists(engine.ServerDir))Say("Pasta Server não encontrada ao lado do painel. Copie o pacote inteiro.",Theme.Danger);else Say("Pronto. Deixe este painel aberto para a Central conseguir pedir o servidor.",Theme.Ink);

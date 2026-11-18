@@ -99,16 +99,55 @@ public sealed class Engine {
   File.WriteAllText(marker,mark);
  }
  static int Netsh(string args){var info=new ProcessStartInfo("netsh.exe",args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true};using(var p=Process.Start(info)){p.StandardOutput.ReadToEnd();p.WaitForExit();return p.ExitCode;}}
+ // Portas que o backend precisa abrir antes do servidor com bots se registrar nele.
+ List<int> BackendPorts(){
+  string cfg=File.ReadAllText(Path.Combine(ServerDir,"config.txt"));var list=new List<int>{Port(cfg,"ClientPort",10040),Port(cfg,"BlazeServerPort",10041),Port(cfg,"HttpPort",80)};
+  var m=Regex.Match(cfg,"^RedirectorPorts=([\\d,]+)",RegexOptions.Multiline);if(m.Success)foreach(var x in m.Groups[1].Value.Split(',')){int v;if(Int32.TryParse(x,out v))list.Add(v);}
+  return list.Distinct().ToList();
+ }
+ // A lista de servidores do Battlelog do backend: "Nenhum servidor encontrado" = o servidor não se registrou.
+ // null = não deu para saber (não bloqueia).
+ public bool? Registered(){
+  try{int http=Port(File.ReadAllText(Path.Combine(ServerDir,"config.txt")),"HttpPort",80);
+   var req=(HttpWebRequest)WebRequest.Create("http://127.0.0.1"+(http==80?"":":"+http)+"/bf4/pt/servers/pc/");req.Proxy=null;req.Timeout=8000;req.ReadWriteTimeout=8000;
+   using(var resp=req.GetResponse())using(var r=new StreamReader(resp.GetResponseStream(),Encoding.UTF8)){string page=r.ReadToEnd();if(page.Contains("Nenhum servidor encontrado"))return false;return page.Contains("data-server=")?true:(bool?)null;}
+  }catch{return null;}
+ }
+ // Últimas linhas dos logs mais recentes (backend e servidor), para diagnóstico.
+ public string LogTail(){
+  var sb=new StringBuilder();
+  try{foreach(var dir in new[]{Path.Combine(ServerDir,"logs"),Path.Combine(ServerDir,"Instance","Logs"),Path.Combine(ServerDir,"Instance")}){if(!Directory.Exists(dir))continue;
+   foreach(var f in new DirectoryInfo(dir).GetFiles("*.*").Where(x=>x.Extension==".log"||x.Extension==".txt").OrderByDescending(x=>x.LastWriteTime).Take(2)){
+    sb.AppendLine("== "+f.FullName.Substring(Root.Length)+" ("+f.LastWriteTime.ToString("HH:mm:ss")+")");
+    string[] lines;using(var fs=new FileStream(f.FullName,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))using(var r=new StreamReader(fs,Encoding.UTF8))lines=r.ReadToEnd().Split('\n');
+    foreach(var l in lines.Skip(Math.Max(0,lines.Length-40)))sb.AppendLine(l.TrimEnd());
+   }}}catch(Exception ex){sb.AppendLine("erro: "+ex.Message);}
+  sb.AppendLine("lista do jogo: "+(Registered()==false?"vazia":"ok/desconhecida")+" | backend "+Running(Backend).Count+" | servidor "+Running(Server).Count);
+  string t=sb.ToString();return t.Length>60000?t.Substring(t.Length-60000):t;
+ }
+ void LaunchServer(Action<string> say){say("Ligando o servidor com bots (pode levar até 2 minutos)…");Process.Start(new ProcessStartInfo(Exe(Server),ServerArguments()){WorkingDirectory=ServerDir,UseShellExecute=true,WindowStyle=ProcessWindowStyle.Hidden});}
+ void WaitRcon(int rcon){var sw=Stopwatch.StartNew();while(!Listening(rcon)){if(sw.Elapsed.TotalSeconds>150)throw new TimeoutException("O servidor não terminou de abrir. Veja Server\\logs.");if(Running(Server).Count==0&&sw.Elapsed.TotalSeconds>10)throw new IOException("O servidor fechou sozinho ao iniciar. Veja Server\\logs.");Thread.Sleep(1000);}}
+ bool WaitRegistered(int seconds){var sw=Stopwatch.StartNew();while(sw.Elapsed.TotalSeconds<seconds){var r=Registered();if(r!=false)return true;Thread.Sleep(3000);}return false;}
+ void StopServerOnly(){foreach(var p in Running(Server)){try{p.CloseMainWindow();if(!p.WaitForExit(5000)){p.Kill();p.WaitForExit(10000);}}catch{}}}
  public void Start(bool light,Action<string> say){
   if(!File.Exists(Exe(Backend))||!File.Exists(Exe(Server)))throw new FileNotFoundException("A pasta Server está incompleta. Copie o pacote inteiro.");
   EnsureFirewall(say);
   string ip=LanIp();if(ip==null)throw new IOException("Este PC não está numa rede (sem IP com gateway). Conecte na mesma rede do PC de jogo.");
   SetServerIp(ip);
-  if(Running(Backend).Count==0){say("Ligando o backend…");Process.Start(new ProcessStartInfo(Exe(Backend)){WorkingDirectory=ServerDir,UseShellExecute=false,CreateNoWindow=true});}
-  int client=ClientPort;var sw=Stopwatch.StartNew();while(!Listening(client)){if(sw.Elapsed.TotalSeconds>40)throw new TimeoutException("O backend não abriu a porta "+client+". Veja Server\\logs.");Thread.Sleep(500);}
+  bool fresh=false;
+  if(Running(Backend).Count==0){say("Ligando o backend…");Process.Start(new ProcessStartInfo(Exe(Backend)){WorkingDirectory=ServerDir,UseShellExecute=false,CreateNoWindow=true});fresh=true;}
+  var sw=Stopwatch.StartNew();
+  foreach(int port in BackendPorts())while(!Listening(port)){if(sw.Elapsed.TotalSeconds>60)throw new TimeoutException("O backend não abriu a porta "+port+". Veja Server\\logs.");Thread.Sleep(500);}
+  if(fresh)Thread.Sleep(4000); // deixa o backend terminar de carregar antes do servidor se registrar
   int rcon=RconPort();
-  if(Running(Server).Count==0){say("Ligando o servidor com bots (pode levar até 2 minutos)…");Process.Start(new ProcessStartInfo(Exe(Server),ServerArguments()){WorkingDirectory=ServerDir,UseShellExecute=true,WindowStyle=ProcessWindowStyle.Hidden});}
-  sw.Restart();while(!Listening(rcon)){if(sw.Elapsed.TotalSeconds>150)throw new TimeoutException("O servidor não terminou de abrir. Veja Server\\logs.");if(Running(Server).Count==0&&sw.Elapsed.TotalSeconds>10)throw new IOException("O servidor fechou sozinho ao iniciar. Veja Server\\logs.");Thread.Sleep(1000);}
+  if(Running(Server).Count==0)LaunchServer(say);
+  WaitRcon(rcon);
+  say("Conferindo se o servidor aparece na lista do jogo…");
+  if(!WaitRegistered(75)){
+   say("O servidor não apareceu na lista; reiniciando só o servidor…");
+   StopServerOnly();Thread.Sleep(3000);LaunchServer(say);WaitRcon(rcon);
+   if(!WaitRegistered(90))throw new IOException("O servidor ligou, mas não aparece na lista do jogo. Desligue e ligue de novo; se continuar, veja Server\\logs.");
+  }
   SetPriority(light);
  }
  public void SetPriority(bool light){foreach(var p in Running(Server).Concat(Running(Backend))){try{p.PriorityClass=light?ProcessPriorityClass.BelowNormal:ProcessPriorityClass.Normal;}catch{}}}

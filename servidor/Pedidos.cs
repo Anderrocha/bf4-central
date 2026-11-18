@@ -15,6 +15,7 @@ using System.Windows.Forms;
 //                                                       ou "ACCEPTED", "STATUS|texto"…, "READY|ip|portaRcon" / "FAILED|motivo"
 //              Central → "BF4CENTRAL|1|RELEASE|quem"   painel → "OK|texto"
 //              Central → "BF4CENTRAL|1|PING|quem"      painel → "PONG|nome-do-pc|estado"
+//              Central → "BF4CENTRAL|1|LOGS|quem"      painel → "LOGS|linhas separadas por " (só leitura)
 // Nada liga sem o "Aceitar" do dono deste PC (ou "Sempre aceitar" marcado por ele para aquele PC).
 namespace BF4Servidor {
 public sealed class Pedidos : IDisposable {
@@ -23,6 +24,7 @@ public sealed class Pedidos : IDisposable {
  public Func<Action<string>,string> StartServer;// liga e devolve "ip|portaRcon"
  public Func<bool> StopIfOurs;                  // desliga se foi ligado por pedido; devolve se desligou
  public Func<string> State;
+ public Func<string> Logs;                      // final dos logs do backend/servidor (diagnóstico pela Central)
  public Action<string> Log;
  public volatile bool Accepting=true;
  TcpListener tcp;UdpClient udp;Thread tcpThread,udpThread;volatile bool closed;int handling;
@@ -53,6 +55,7 @@ public sealed class Pedidos : IDisposable {
     if(parts.Length<4||parts[0]!="BF4CENTRAL"){writer.WriteLine("FAILED|Pedido desconhecido.");return;}
     string who=Clean(parts[3]),ip=((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
     switch(parts[2]){
+     case "LOGS":writer.WriteLine("LOGS|"+(Logs==null?"":Logs().Replace("\r","").Replace("|","/").Replace("\n","\u0001")));return;
      case "PING":writer.WriteLine("PONG|"+Environment.MachineName+"|"+(State==null?"":State()));return;
      case "RELEASE":{bool stopped=StopIfOurs!=null&&StopIfOurs();writer.WriteLine("OK|"+(stopped?"Servidor desligado no outro PC.":"Nada para desligar."));Say(who+" ("+ip+") liberou este PC"+(stopped?"; servidor desligado.":"."));return;}
      case "CONNECT":break;
