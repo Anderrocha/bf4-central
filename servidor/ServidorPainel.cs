@@ -22,8 +22,8 @@ static class Program {
   if(args.Length>2&&args[0]=="--self-test")return SelfTest(args[1],args[2]);
   Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
   bool created;using(var single=new Mutex(true,"Local\\BF4ServidorPainel",out created)){
-   if(!created){MessageBox.Show("O painel do servidor já está aberto.","BF4 Servidor",MessageBoxButtons.OK,MessageBoxIcon.Information);return 0;}
-   Application.Run(new Painel(root));
+   if(!created){if(!args.Contains("--tray"))MessageBox.Show("O painel do servidor já está aberto (veja o ícone perto do relógio).","BF4 Servidor",MessageBoxButtons.OK,MessageBoxIcon.Information);return 0;}
+   Application.Run(new Painel(root,args.Contains("--tray")));
   }
   return 0;
  }
@@ -78,17 +78,24 @@ public sealed class Engine {
   string updated=Regex.IsMatch(text,"^ServerIP=.*$",RegexOptions.Multiline)?Regex.Replace(text,"^ServerIP=.*$","ServerIP="+ip,RegexOptions.Multiline):text.TrimEnd()+"\r\nServerIP="+ip+"\r\n";
   if(updated!=text)File.WriteAllText(cfg,updated);
  }
- // Regras de entrada no firewall (rede privada) para os dois programas; uma vez só.
+ // Regras de entrada no firewall (rede privada), refeitas quando a versão das regras muda:
+ // programas do backend e do servidor, porta RCON (o controle da Central) e o próprio painel (pedidos).
+ const string FirewallVersion="v2";
  public void EnsureFirewall(Action<string> say){
-  string marker=Path.Combine(Root,"firewall-ok.txt");if(File.Exists(marker)&&File.ReadAllText(marker).Trim()==ServerDir)return;
-  say("Liberando o servidor no firewall (rede privada)…");
-  foreach(var exe in new[]{Backend,Server})foreach(var proto in new[]{"TCP","UDP"}){
-   string name="BF4 Servidor "+Path.GetFileNameWithoutExtension(exe)+" "+proto;
-   Netsh("advfirewall firewall delete rule name=\""+name+"\"");
-   int code=Netsh("advfirewall firewall add rule name=\""+name+"\" dir=in action=allow program=\""+Exe(exe)+"\" protocol="+proto+" profile=private,domain enable=yes");
-   if(code!=0)throw new IOException("Não consegui criar a regra de firewall ("+name+"). Abra o painel como administrador.");
+  string marker=Path.Combine(Root,"firewall-ok.txt");string mark=FirewallVersion+"|"+ServerDir+"|"+Application.ExecutablePath;if(File.Exists(marker)&&File.ReadAllText(marker).Trim()==mark)return;
+  say("Liberando o servidor e os pedidos da Central no firewall (rede privada)…");
+  var rules=new List<string>();
+  foreach(var exe in new[]{Backend,Server})foreach(var proto in new[]{"TCP","UDP"})rules.Add("name=\"BF4 Servidor "+Path.GetFileNameWithoutExtension(exe)+" "+proto+"\" dir=in action=allow program=\""+Exe(exe)+"\" protocol="+proto);
+  int rcon=25210;try{rcon=RconPort();}catch{}
+  rules.Add("name=\"BF4 Servidor RCON TCP\" dir=in action=allow protocol=TCP localport="+rcon);
+  rules.Add("name=\"BF4 Servidor pedidos TCP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=TCP localport=25230");
+  rules.Add("name=\"BF4 Servidor busca UDP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=UDP localport=25231");
+  foreach(var rule in rules){
+   string name=rule.Substring(0,rule.IndexOf(" dir="));
+   Netsh("advfirewall firewall delete rule "+name);
+   if(Netsh("advfirewall firewall add rule "+rule+" profile=private,domain enable=yes")!=0)throw new IOException("Não consegui criar a regra de firewall ("+name+"). Abra o painel como administrador.");
   }
-  File.WriteAllText(marker,ServerDir);
+  File.WriteAllText(marker,mark);
  }
  static int Netsh(string args){var info=new ProcessStartInfo("netsh.exe",args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true};using(var p=Process.Start(info)){p.StandardOutput.ReadToEnd();p.WaitForExit();return p.ExitCode;}}
  public void Start(bool light,Action<string> say){
@@ -108,54 +115,6 @@ public sealed class Engine {
   foreach(var name in new[]{Server,Backend}){
    foreach(var p in Running(name)){say("Desligando "+(name==Server?"o servidor":"o backend")+"…");try{p.CloseMainWindow();if(!p.WaitForExit(5000)){p.Kill();p.WaitForExit(10000);}}catch{}}
   }
- }
-}
-public sealed class Painel : Form {
- readonly Engine engine;readonly Label state,detail,ipLabel,log;readonly Button toggle,copy;readonly CheckBox light;readonly System.Windows.Forms.Timer timer;bool busy;
- static readonly Color Ink=ColorTranslator.FromHtml("#1E3442"),Muted=ColorTranslator.FromHtml("#4D626E"),Back=ColorTranslator.FromHtml("#E8EDF0"),Green=ColorTranslator.FromHtml("#0B8A4B"),Red=ColorTranslator.FromHtml("#B3261E");
- public Painel(string root){
-  engine=new Engine(root);Text="BF4 • Servidor dedicado";ClientSize=new Size(520,360);MinimumSize=new Size(480,380);StartPosition=FormStartPosition.CenterScreen;BackColor=Back;ForeColor=Ink;Font=new Font("Segoe UI",10);
-  try{Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath);}catch{}
-  var stack=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(22,18,22,14),ColumnCount=1,RowCount=7};
-  foreach(int h in new[]{40,30,74,54,32,30,0})stack.RowStyles.Add(h==0?new RowStyle(SizeType.Percent,100):new RowStyle(SizeType.Absolute,h));
-  stack.Controls.Add(new Label{Text="Servidor BF4 com bots",Font=new Font("Bahnschrift",17,FontStyle.Bold),Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleLeft},0,0);
-  state=new Label{Dock=DockStyle.Fill,Font=new Font("Segoe UI",11,FontStyle.Bold),TextAlign=ContentAlignment.MiddleLeft};stack.Controls.Add(state,0,1);
-  var ipRow=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,BackColor=Color.White,Padding=new Padding(12,8,8,8),Margin=new Padding(0,4,0,4)};ipRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));ipRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,96));
-  ipLabel=new Label{Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleLeft};ipRow.Controls.Add(ipLabel,0,0);
-  copy=new Button{Text="Copiar IP",Dock=DockStyle.Fill,FlatStyle=FlatStyle.System};copy.Click+=(s,e)=>{var ip=Engine.LanIp();if(ip!=null){Clipboard.SetText(ip);Say("IP copiado: "+ip);}};ipRow.Controls.Add(copy,1,0);
-  stack.Controls.Add(ipRow,0,2);
-  toggle=new Button{Dock=DockStyle.Fill,Font=new Font("Segoe UI",12,FontStyle.Bold),FlatStyle=FlatStyle.Flat,ForeColor=Color.White,Margin=new Padding(0,6,0,6),Cursor=Cursors.Hand};toggle.FlatAppearance.BorderSize=0;toggle.Click+=async(s,e)=>await Toggle();stack.Controls.Add(toggle,0,3);
-  light=new CheckBox{Text="Modo leve: prioridade baixa (o PC continua bom para outras tarefas)",Dock=DockStyle.Fill,Checked=LoadLight()};light.CheckedChanged+=(s,e)=>{SaveLight(light.Checked);engine.SetPriority(light.Checked);};stack.Controls.Add(light,0,4);
-  detail=new Label{Dock=DockStyle.Fill,ForeColor=Muted,TextAlign=ContentAlignment.MiddleLeft};stack.Controls.Add(detail,0,5);
-  log=new Label{Dock=DockStyle.Fill,ForeColor=Muted,TextAlign=ContentAlignment.TopLeft};stack.Controls.Add(log,0,6);
-  Controls.Add(stack);
-  timer=new System.Windows.Forms.Timer{Interval=2000};timer.Tick+=(s,e)=>Refresh2();timer.Start();Refresh2();
-  if(!Directory.Exists(engine.ServerDir))Say("Pasta Server não encontrada ao lado do painel. Copie o pacote inteiro.");
-  FormClosing+=(s,e)=>{if(busy){e.Cancel=true;return;}if(engine.Running(Engine.Server).Count>0&&MessageBox.Show("O servidor continua ligado em segundo plano. Fechar só o painel?","BF4 Servidor",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true;};
- }
- string LightFile{get{return Path.Combine(engine.Root,"modo-leve.txt");}}
- bool LoadLight(){try{return File.Exists(LightFile)&&File.ReadAllText(LightFile).Trim()=="1";}catch{return false;}}
- void SaveLight(bool v){try{File.WriteAllText(LightFile,v?"1":"0");}catch{}}
- void Say(string text){if(InvokeRequired){BeginInvoke(new Action(()=>Say(text)));return;}log.Text=text;}
- void Refresh2(){
-  if(busy)return;
-  bool backend=engine.Running(Engine.Backend).Count>0,server=engine.Running(Engine.Server).Count>0,ready=server&&Engine.Listening(SafeRcon());
-  string ip=Engine.LanIp()??"(sem rede)";
-  ipLabel.Text="No PC de jogo, use este IP na BF4 Central:\r\n"+ip;
-  if(ready){state.Text="● Ligado";state.ForeColor=Green;toggle.Text="Desligar servidor";toggle.BackColor=Red;}
-  else if(backend||server){state.Text="● Ligando ou incompleto";state.ForeColor=ColorTranslator.FromHtml("#B26A00");toggle.Text="Desligar servidor";toggle.BackColor=Red;}
-  else{state.Text="○ Desligado";state.ForeColor=Muted;toggle.Text="Ligar servidor";toggle.BackColor=Green;}
-  detail.Text="Backend: "+(backend?"ligado":"desligado")+"   •   Servidor com bots: "+(server?(ready?"pronto":"abrindo"):"desligado");
- }
- int SafeRcon(){try{return engine.RconPort();}catch{return 25210;}}
- async Task Toggle(){
-  if(busy)return;bool on=engine.Running(Engine.Server).Count>0||engine.Running(Engine.Backend).Count>0;busy=true;toggle.Enabled=false;
-  toggle.Text=on?"Desligando…":"Ligando…";toggle.BackColor=Muted;
-  try{
-   if(on){await Task.Run(()=>engine.Stop(Say));Say("Servidor desligado. O processador deste PC está livre.");}
-   else{bool l=light.Checked;await Task.Run(()=>engine.Start(l,Say));Say("Pronto. No PC de jogo, clique em Iniciar tudo e jogar.");}
-  }catch(Exception ex){Say(ex.Message);}
-  finally{busy=false;toggle.Enabled=true;Refresh2();}
  }
 }
 }

@@ -2,6 +2,14 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## PC servidor com pedido e aceite (18/11/2026) — 0.5.19
+- Central: botão "Conectar ao PC servidor" (aba Servidor). Acha o painel na rede sozinho (último IP usado ou busca UDP 25231), pede pela porta TCP 25230 e espera o dono aceitar.
+- Aceitou: o outro PC liga o servidor; a Central fecha o servidor e o backend locais, aponta Blaze e RCON para o outro PC e abre o jogo (todos os núcleos ficam para o jogo).
+- Recusou, não respondeu em 60 s ou o painel está fechado: tudo volta para o servidor deste PC, com a dica de usar menos bots e mapas fechados.
+- "Voltar ao meu servidor" também libera o PC servidor (ele desliga o que ligou a pedido). "Iniciar tudo e jogar" volta para este PC se o PC servidor não estiver mais ligado.
+- Painel BF4 Servidor redesenhado no visual da Central (cabeçalho com a arte, cartões, interruptores). Janela de pedido com "Aceitar e ligar", "Recusar", "Sempre aceitar deste PC" e recusa automática em 60 s.
+- Painel: fica perto do relógio ao fechar, opção "Abrir com o Windows" (tarefa agendada no logon) e regras de firewall novas (porta RCON 25210, pedidos 25230/25231).
+
 ## Servidor em outro PC: painel "BF4 Servidor" (18/11/2026) — 0.5.18
 
 - Novo programa `servidor\ServidorPainel.cs` (`dist\BF4 Servidor.exe`, `servidor\build.cmd`): painel para um segundo PC da rede com um botão Ligar/Desligar. No primeiro uso libera o backend e o servidor no firewall (rede privada); a cada ligação grava o IP do PC no `Server\config.txt` (ServerIP), liga o backend, depois o servidor com bots (parâmetros lidos do `!StartServer.bat`), tudo sem janelas, e mostra o IP para usar na Central. Opção "Modo leve" (prioridade baixa).

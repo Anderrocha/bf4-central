@@ -55,7 +55,7 @@ public sealed partial class Central {
   if(!ConfirmGameSwitch())return;
   bool switched=false;
   await Work("Voltando ao servidor deste PC…",async()=>{
-   await Task.Run(()=>Friends.ReturnLocal(root));
+   await Task.Run(()=>ReturnLocalAll());
    LoadSettings();
    incoming=null;
    inviteSummary.Text="Conexão local selecionada. Abra um convite para entrar no servidor de um amigo.";
