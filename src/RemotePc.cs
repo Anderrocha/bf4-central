@@ -56,13 +56,13 @@ public static class RemotePc {
  }
  // Faz o pedido e espera: o dono aceitar (até ~60 s) e o servidor ficar pronto (até ~3 min).
  // Devolve {ip, portaRcon}. RemoteRefused quando recusou, não respondeu ou desativou os pedidos.
- public static string[] Request(string host,string who,Action<string> progress){
+ public static string[] Request(string host,string who,Action<string> progress,string hookIni=null){
   TcpClient client;
   try{client=Open(host,ControlPort,3000);}catch{throw new RemoteRefused("O PC servidor ("+host+") não respondeu. O painel BF4 Servidor está aberto lá?");}
   using(client){
    var stream=client.GetStream();client.ReceiveTimeout=90000;
    var writer=new StreamWriter(stream,new UTF8Encoding(false)){AutoFlush=true,NewLine="\n"};var reader=new StreamReader(stream,new UTF8Encoding(false));
-   writer.WriteLine("BF4CENTRAL|1|CONNECT|"+who.Replace("|","/"));
+   writer.WriteLine("BF4CENTRAL|1|CONNECT|"+who.Replace("|","/")+(hookIni!=null?"|"+Convert.ToBase64String(Encoding.UTF8.GetBytes(hookIni)):""));
    while(true){
     string line;
     try{line=reader.ReadLine();}catch(IOException){throw new RemoteRefused("O outro PC parou de responder ao pedido.");}
@@ -80,6 +80,22 @@ public static class RemotePc {
   }
  }
  // Avisa o painel que este PC não precisa mais do servidor (ele desliga o que ligou a pedido).
+ // Envia os ajustes dos bots ao PC servidor conectado; ele grava e reinicia só o servidor.
+ public static string SendHook(string host,string who,string ini,Action<string> progress){
+  TcpClient client;try{client=Open(host,ControlPort,3000);}catch{throw new IOException("O PC servidor ("+host+") não respondeu.");}
+  using(client){
+   client.ReceiveTimeout=300000;var stream=client.GetStream();
+   var writer=new StreamWriter(stream,new UTF8Encoding(false)){AutoFlush=true,NewLine="\n"};var reader=new StreamReader(stream,new UTF8Encoding(false));
+   writer.WriteLine("BF4CENTRAL|1|HOOK|"+who.Replace("|","/")+"|"+Convert.ToBase64String(Encoding.UTF8.GetBytes(ini)));
+   while(true){
+    string line=reader.ReadLine();if(line==null)throw new IOException("O PC servidor encerrou sem responder.");
+    var p=line.Split('|');string msg=p.Length>1?p[1]:"";
+    if(p[0]=="STATUS")progress("PC servidor: "+msg);
+    else if(p[0]=="OK")return msg;
+    else if(p[0]=="DENIED"||p[0]=="FAILED")throw new IOException(msg.Length>0?msg:"O PC servidor recusou os ajustes.");
+   }
+  }
+ }
  public static void Release(string host,string who){
   try{using(var client=Open(host,ControlPort,2000)){client.ReceiveTimeout=30000;var stream=client.GetStream();var writer=new StreamWriter(stream,new UTF8Encoding(false)){AutoFlush=true,NewLine="\n"};writer.WriteLine("BF4CENTRAL|1|RELEASE|"+who.Replace("|","/"));new StreamReader(stream).ReadLine();}}catch{}
  }
@@ -97,6 +113,15 @@ public sealed partial class Central {
  }
  // "Voltar ao meu servidor": libera o PC servidor (se houver) e aponta jogo e controle para este PC.
  void ReturnLocalAll(){string host=RemotePc.ActiveHost();if(host!=null){RemotePc.Release(host,RemoteWho());RemotePc.ClearActive();}Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}
+ // Botão "Ajustes dos bots…" (aba Bots): grava aqui e, com o PC servidor conectado, envia para lá.
+ void OpenBotTuning(){
+  if(busy)return;
+  using(var form=new BotTuningForm(root,async(ini,say)=>{
+   string host=RemotePc.ActiveHost();
+   if(host!=null){say("Enviando para o PC servidor ("+host+") e reiniciando o servidor de lá (até 2 minutos)…");string r=await Task.Run(()=>RemotePc.SendHook(host,RemoteWho(),ini,t=>say(t)));say(r);Status("Ajustes dos bots aplicados no PC servidor. "+r);}
+   else{bool running=OneClick.At(Path.Combine(root,"Server\\bf4_Server_Final.exe")).Count>0;string m=running?"Salvo. Para valer agora, use Reiniciar servidor na aba Servidor (a partida atual reinicia).":"Salvo. Vale quando o servidor ligar.";say(m);Status("Ajustes dos bots salvos. "+m);}
+  }))form.ShowDialog(this);
+ }
  // O mesmo botão conecta e desconecta, conforme o estado salvo.
  Button remoteButton;
  void RemoteLabel(){if(remoteButton!=null)remoteButton.Text=RemotePc.ActiveHost()!=null?"Desconectar do PC servidor":"Conectar ao PC servidor";}
@@ -116,7 +141,8 @@ public sealed partial class Central {
    await Task.Run(()=>{
     host=RemotePc.Find(progress);
     if(host==null){refusal="Nenhum PC com o painel BF4 Servidor respondeu na rede.";return;}
-    try{result=RemotePc.Request(host,who,progress);}catch(RemoteRefused ex){refusal=ex.Message;}
+    string hookIni=null;try{hookIni=BotTuning.Text(root);}catch{}
+    try{result=RemotePc.Request(host,who,progress,hookIni);}catch(RemoteRefused ex){refusal=ex.Message;}
    });
    if(refusal!=null){
     await Task.Run(()=>BackToLocal());LoadSettings();

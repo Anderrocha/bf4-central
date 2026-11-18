@@ -162,6 +162,31 @@ public sealed class Engine {
   }
   SetPriority(light);
  }
+ // Ajustes dos bots vindos da Central: só troca o valor de chaves que já existem no ini deste PC,
+ // com valores simples (números, letras, ; . - _ espaço). Comentários e o resto do arquivo ficam como estão.
+ public bool ApplyHook(string incoming){
+  string path=Exe("dinput8_bf4hook.ini");string text;using(var r=new StreamReader(path,Encoding.UTF8,true))text=r.ReadToEnd();
+  var values=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);bool section=false;
+  foreach(var raw in incoming.Split('\n')){string t=raw.Trim();if(t.StartsWith("[")){section=String.Equals(t,"[bf4hook]",StringComparison.OrdinalIgnoreCase);continue;}
+   if(!section||t.Length==0||t.StartsWith(";")||t.StartsWith("#"))continue;var m=Regex.Match(t,"^([A-Za-z0-9_]{1,60})\\s*=\\s*([A-Za-z0-9_.;\\- ]{0,200})$");if(m.Success){string k=m.Groups[1].Value,v=m.Groups[2].Value.Trim();if(k!="ChatCommandAdmins"&&v.IndexOfAny(new[]{';',' '})>=0)continue;values[k]=v;}}
+  if(values.Count==0)throw new InvalidDataException("Ajustes dos bots vazios ou inválidos.");
+  bool changed=false;section=false;var lines=Regex.Split(text,"(?<=\\n)");
+  for(int i=0;i<lines.Length;i++){string t=lines[i].Trim();if(t.StartsWith("[")){section=String.Equals(t,"[bf4hook]",StringComparison.OrdinalIgnoreCase);continue;}
+   if(!section)continue;var m=Regex.Match(lines[i],"^(\\s*)([A-Za-z0-9_]+)(\\s*=\\s*)([^\\r\\n;#]*?)(\\s*[;#][^\\r\\n]*)?(\\r?\\n)?$");string v;
+   if(m.Success&&values.TryGetValue(m.Groups[2].Value,out v)&&m.Groups[4].Value.Trim()!=v){lines[i]=m.Groups[1].Value+m.Groups[2].Value+m.Groups[3].Value+v+m.Groups[5].Value+m.Groups[6].Value;changed=true;}}
+  if(!changed)return false;
+  string backup=path+".antes-central";if(!File.Exists(backup))File.Copy(path,backup);
+  string tmp=path+".tmp";File.WriteAllText(tmp,String.Concat(lines),new UTF8Encoding(false));File.Copy(tmp,path,true);File.Delete(tmp);
+  return true;
+ }
+ // Reinicia só o servidor com bots (o backend continua) e confere se voltou para a lista.
+ public void RestartServerOnly(bool light,Action<string> say){
+  if(Running(Server).Count==0)return;
+  say("Reiniciando o servidor para valer os ajustes dos bots…");StopServerOnly();Thread.Sleep(3000);LaunchServer(say);WaitRcon(RconPort());
+  say("Conferindo se o servidor aparece na lista do jogo…");
+  if(!WaitRegistered(75)){say("O servidor não apareceu na lista; reiniciando de novo…");StopServerOnly();Thread.Sleep(3000);LaunchServer(say);WaitRcon(RconPort());if(!WaitRegistered(90))throw new IOException("O servidor reiniciou, mas não aparece na lista do jogo.");}
+  SetPriority(light);
+ }
  public void SetPriority(bool light){foreach(var p in Running(Server).Concat(Running(Backend))){try{p.PriorityClass=light?ProcessPriorityClass.BelowNormal:ProcessPriorityClass.Normal;}catch{}}}
  public void Stop(Action<string> say){
   foreach(var name in new[]{Server,Backend}){

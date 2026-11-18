@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Ajustes dos bots por intensidade (18/11/2026) — Central 0.5.22 / painel 0.5.25
+- Aba Bots: botão "Ajustes dos bots…" abre uma janela com 14 comportamentos e níveis (Não/Sim ou Desligado/Baixa/Média/Alta): combate, bots contra bots, munição, caixas de apoio, granadas, lança-foguetes, veículos, nascer na linha de frente, nascer no esquadrão, reanimação, foco nas bandeiras, avanço, agilidade e chat. Perfis rápidos: Leve, Equilibrado, Intenso e Original do mod. Grava com backup pela mesma rotina dos perfis.
+- PC servidor: ao conectar, a Central manda os ajustes junto com o pedido; com a conexão ativa, "Salvar e aplicar" envia na hora e o painel reinicia só o servidor. O painel só aceita ajustes do PC que teve o pedido aceito, só troca chaves que já existem no ini e só aceita valores simples.
+- Painel 0.5.24: avisa quando falta o Server\dinput8.dll (removido pelo antivírus).
+
 ## Firewall do painel (18/11/2026) — painel 0.5.23
 - Ao abrir, o painel remove regras de BLOQUEIO de entrada que o Windows cria quando o aviso "Permitir acesso?" é fechado ou cancelado (painel, backend e servidor).
 - Regras das portas do painel (25230, 25212, 25231) passam a ser por porta, sem depender do caminho do exe.

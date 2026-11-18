@@ -209,6 +209,7 @@ public static partial class L {
 "Entrar no servidor do amigo","Join friend's server","Entrar al servidor del amigo",
 "Voltar ao meu servidor","Back to my server","Volver a mi servidor",
 "Conectar ao PC servidor","Connect to server PC","Conectar al PC servidor",
+"Ajustes dos bots…","Bot settings…","Ajustes de los bots…",
 "Desconectar do PC servidor","Disconnect server PC","Desconectar del PC servidor",
 "Desconectando do PC servidor…","Disconnecting from the server PC…","Desconectando del PC servidor…",
 "Procurando o PC servidor…","Looking for the server PC…","Buscando el PC servidor…",
