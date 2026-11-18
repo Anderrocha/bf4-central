@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Painel sempre ligado (18/11/2026) — 0.5.20
+- Painel BF4 Servidor: na primeira vez que abre (UAC uma vez só) se instala como "Sempre ligado (24 h)": tarefa agendada com gatilho no logon e a cada 1 minuto (uma cópia só), então volta sozinho após reinício, queda de energia ou crash, e fica perto do relógio só esperando pedidos.
+- O estado "ligado a pedido" fica salvo em arquivo: desconectar pela Central desliga o servidor mesmo se o painel caiu no meio.
+- Central: o botão vira "Desconectar do PC servidor" enquanto conectado (desliga lá e volta tudo para este PC).
+
 ## PC servidor com pedido e aceite (18/11/2026) — 0.5.19
 - Central: botão "Conectar ao PC servidor" (aba Servidor). Acha o painel na rede sozinho (último IP usado ou busca UDP 25231), pede pela porta TCP 25230 e espera o dono aceitar.
 - Aceitou: o outro PC liga o servidor; a Central fecha o servidor e o backend locais, aponta Blaze e RCON para o outro PC e abre o jogo (todos os núcleos ficam para o jogo).

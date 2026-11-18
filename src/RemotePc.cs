@@ -97,6 +97,16 @@ public sealed partial class Central {
  }
  // "Voltar ao meu servidor": libera o PC servidor (se houver) e aponta jogo e controle para este PC.
  void ReturnLocalAll(){string host=RemotePc.ActiveHost();if(host!=null){RemotePc.Release(host,RemoteWho());RemotePc.ClearActive();}Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}
+ // O mesmo botão conecta e desconecta, conforme o estado salvo.
+ Button remoteButton;
+ void RemoteLabel(){if(remoteButton!=null)remoteButton.Text=RemotePc.ActiveHost()!=null?"Desconectar do PC servidor":"Conectar ao PC servidor";}
+ async Task ToggleRemote(){try{if(RemotePc.ActiveHost()!=null)await DisconnectRemote();else await ConnectRemote();}finally{RemoteLabel();}}
+ // Desconectar: o PC servidor desliga o que ligou a pedido e tudo volta para este PC.
+ async Task DisconnectRemote(){
+  if(!ConfirmGameSwitch())return;
+  string host=RemotePc.ActiveHost();
+  await Work("Desconectando do PC servidor…",async()=>{await Task.Run(()=>ReturnLocalAll());LoadSettings();Status("Desconectado do PC servidor ("+host+"): o servidor de lá foi desligado e tudo voltou para este PC."+LocalAdvice);});
+ }
  const string LocalAdvice=" Sem a divisão do processador, use menos bots e mapas fechados (ex.: Operation Locker) para não pesar.";
  async Task ConnectRemote(){
   if(!ConfirmGameSwitch())return;
@@ -131,7 +141,7 @@ public sealed partial class Central {
   var c=Settings.Read(root);if(Settings.Get(c,"BlazeIP","127.0.0.1")!=host){RemotePc.ClearActive();return true;}
   if(await Task.Run(()=>RemotePc.Reachable(host,10040,2000)))return true;
   try{await Task.Run(()=>{RemotePc.ClearActive();if(!OneClick.IsGameOpen(root)&&PointsAway()){Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}});LoadSettings();}catch(Exception ex){Status(ex.Message,true);return false;}
-  Status("O PC servidor ("+host+") não está ligado. Voltei para o servidor deste PC."+LocalAdvice,true);
+  RemoteLabel();Status("O PC servidor ("+host+") não está ligado. Voltei para o servidor deste PC."+LocalAdvice,true);
   return true;
  }
 }

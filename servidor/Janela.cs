@@ -10,7 +10,9 @@ namespace BF4Servidor {
 public sealed class Painel : Form {
  readonly Engine engine;readonly Pedidos pedidos=new Pedidos();
  readonly Dot dot;readonly Label state,detail,ip,lastRequest;readonly PillButton toggle,copy;readonly Switch accept,light,autostart;readonly StatusStrip2 status;readonly NotifyIcon tray;readonly System.Windows.Forms.Timer timer;
- bool busy,quitting,startedByRequest;readonly bool startHidden;
+ bool busy,quitting;
+ // Guardado em arquivo: se o painel cair ou o PC reiniciar, "Desconectar" na Central ainda desliga o que foi ligado a pedido.
+ bool startedByRequest{get{return Flag("ligado-a-pedido.txt",false);}set{SetFlag("ligado-a-pedido.txt",value);}}readonly bool startHidden;
  public Painel(string root,bool hidden){
   engine=new Engine(root);startHidden=hidden;
   Text="BF4 • Servidor dedicado";ClientSize=new Size(600,760);MinimumSize=new Size(560,780);StartPosition=FormStartPosition.CenterScreen;BackColor=Theme.Background;ForeColor=Theme.Ink;Font=Theme.Body;AutoScaleMode=AutoScaleMode.Dpi;
@@ -38,8 +40,8 @@ public sealed class Painel : Form {
   accept.CheckedChanged+=(s,e)=>{pedidos.Accepting=accept.Checked;SetFlag("aceitar-pedidos.txt",accept.Checked);Say(accept.Checked?"Pedidos da Central ativados.":"Pedidos da Central desativados: a Central vai usar o próprio PC.",Theme.Ink);};lg.Controls.Add(accept,0,1);
   light=new Switch{Caption="Modo leve",Hint="Prioridade baixa: o dono usa o PC sem travar; os bots podem reagir um pouco mais devagar.",Dock=DockStyle.Fill,BackColor=Theme.Surface,Checked=Flag("modo-leve.txt",false)};
   light.CheckedChanged+=(s,e)=>{SetFlag("modo-leve.txt",light.Checked);engine.SetPriority(light.Checked);};lg.Controls.Add(light,0,2);
-  autostart=new Switch{Caption="Abrir com o Windows",Hint="Ao entrar no Windows, o painel abre perto do relógio, pronto para os pedidos.",Dock=DockStyle.Fill,BackColor=Theme.Surface,Checked=Startup.Enabled()};
-  autostart.Click+=(s,e)=>{try{Startup.Set(autostart.Checked);Say(autostart.Checked?"O painel vai abrir junto com o Windows.":"O painel não abre mais com o Windows.",Theme.Success);}catch(Exception ex){autostart.Checked=Startup.Enabled();Say(ex.Message,Theme.Danger);}};lg.Controls.Add(autostart,0,3);
+  autostart=new Switch{Caption="Sempre ligado (24 h)",Hint="Abre sozinho com o Windows e volta em até 1 minuto se cair; fica perto do relógio só esperando pedidos.",Dock=DockStyle.Fill,BackColor=Theme.Surface,Checked=Startup.Enabled()};
+  autostart.Click+=(s,e)=>{try{Startup.Set(autostart.Checked);Say(autostart.Checked?"Painel sempre ligado: abre com o Windows e volta sozinho se cair.":"O painel não abre mais sozinho.",Theme.Success);}catch(Exception ex){autostart.Checked=Startup.Enabled();Say(ex.Message,Theme.Danger);}};lg.Controls.Add(autostart,0,3);
   lastRequest=new Label{Dock=DockStyle.Fill,ForeColor=Theme.Muted,Text="Nenhum pedido recebido ainda.",TextAlign=ContentAlignment.MiddleLeft,AutoEllipsis=true};lg.Controls.Add(lastRequest,0,4);
   link.Controls.Add(lg);body.Controls.Add(link,0,2);
   status=new StatusStrip2{Dock=DockStyle.Fill,Margin=Padding.Empty};body.Controls.Add(status,0,3);
@@ -62,6 +64,9 @@ public sealed class Painel : Form {
  bool booted;
  void Boot(){
   if(booted)return;booted=true;
+  // Primeira vez (ou versão nova da tarefa): deixa o painel sempre ligado sem precisar clicar em nada.
+  bool firstSetup=Startup.NeedsSetup(engine.Root);
+  if(firstSetup){try{Startup.Set(true);Startup.MarkSetup(engine.Root);autostart.Checked=true;if(accept.Checked==false)accept.Checked=true;Say("Pronto! O painel fica sempre ligado em segundo plano (perto do relógio) e só aparece quando a Central pedir.",Theme.Success);tray.ShowBalloonTip(5000,"BF4 Servidor","Instalado. Ele abre sozinho com o Windows e volta se cair. Pode fechar esta janela.",ToolTipIcon.Info);}catch(Exception ex){Say(ex.Message,Theme.Danger);}}
   Task.Run(()=>{
    try{engine.EnsureFirewall(t=>Say(t,Theme.Accent));}catch(Exception ex){Say(ex.Message,Theme.Danger);}
    try{pedidos.Start();}catch(Exception ex){Say("Não consegui abrir a porta "+Pedidos.ControlPort+" para os pedidos: "+ex.Message,Theme.Danger);}
@@ -125,13 +130,38 @@ public sealed class Painel : Form {
  }
 }
 // "Abrir com o Windows": tarefa agendada no logon com privilégio de administrador (sem pedir UAC a cada vez).
-static class Startup {
- const string Task="BF4 Servidor (painel)";
+// "Sempre ligado": tarefa agendada com privilégio de administrador (o UAC é pedido uma vez só, na instalação).
+// Gatilhos: entrar no Windows + a cada 1 minuto. Se o painel já está aberto a tarefa não abre outro;
+// se ele caiu (crash, fechado à força), volta no minuto seguinte. Após queda de energia, volta no logon.
+public static class Startup {
+ const string Task="BF4 Servidor (painel)",Version="v2";
  static int Run(string args){var info=new ProcessStartInfo("schtasks.exe",args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};using(var p=Process.Start(info)){p.StandardOutput.ReadToEnd();p.StandardError.ReadToEnd();p.WaitForExit();return p.ExitCode;}}
  public static bool Enabled(){try{return Run("/Query /TN \""+Task+"\"")==0;}catch{return false;}}
+ static string Marker(string root){return Path.Combine(root,"sempre-ligado.txt");}
+ public static bool NeedsSetup(string root){try{string m=Marker(root);return !File.Exists(m)||File.ReadAllText(m).Trim()!=Version+"|"+Application.ExecutablePath;}catch{return true;}}
+ public static void MarkSetup(string root){File.WriteAllText(Marker(root),Version+"|"+Application.ExecutablePath);}
+ static string X(string s){return System.Security.SecurityElement.Escape(s);}
+ public static string Xml(string exe){
+  string user=Environment.UserDomainName+"\\"+Environment.UserName,start=DateTime.Now.AddMinutes(1).ToString("yyyy-MM-ddTHH:mm:00");
+  string xml="<?xml version=\"1.0\" encoding=\"UTF-16\"?><Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">"+
+   "<RegistrationInfo><Description>Painel do servidor BF4 com bots: espera pedidos da BF4 Central.</Description></RegistrationInfo>"+
+   "<Triggers><LogonTrigger><Enabled>true</Enabled><UserId>"+X(user)+"</UserId></LogonTrigger>"+
+   "<TimeTrigger><Enabled>true</Enabled><StartBoundary>"+start+"</StartBoundary><Repetition><Interval>PT1M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition></TimeTrigger></Triggers>"+
+   "<Principals><Principal id=\"Author\"><UserId>"+X(user)+"</UserId><LogonType>InteractiveToken</LogonType><RunLevel>HighestAvailable</RunLevel></Principal></Principals>"+
+   "<Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>"+
+   "<AllowHardTerminate>true</AllowHardTerminate><StartWhenAvailable>true</StartWhenAvailable><RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>"+
+   "<IdleSettings><StopOnIdleEnd>false</StopOnIdleEnd><RestartOnIdle>false</RestartOnIdle></IdleSettings><AllowStartOnDemand>true</AllowStartOnDemand><Enabled>true</Enabled><Hidden>false</Hidden>"+
+   "<RunOnlyIfIdle>false</RunOnlyIfIdle><WakeToRun>false</WakeToRun><ExecutionTimeLimit>PT0S</ExecutionTimeLimit><Priority>7</Priority>"+
+   "<RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>"+
+   "<Actions Context=\"Author\"><Exec><Command>"+X(exe)+"</Command><Arguments>--tray</Arguments><WorkingDirectory>"+X(Path.GetDirectoryName(exe))+"</WorkingDirectory></Exec></Actions></Task>";
+  return xml;
+ }
  public static void Set(bool on){
-  int code=on?Run("/Create /F /TN \""+Task+"\" /SC ONLOGON /RL HIGHEST /TR \"\\\""+Application.ExecutablePath+"\\\" --tray\""):Run("/Delete /F /TN \""+Task+"\"");
-  if(code!=0)throw new IOException(on?"Não consegui criar a inicialização automática.":"Não consegui remover a inicialização automática.");
+  if(!on){if(Enabled()&&Run("/Delete /F /TN \""+Task+"\"")!=0)throw new IOException("Não consegui desligar o \"sempre ligado\".");return;}
+  string xml=Xml(Application.ExecutablePath);
+  string file=Path.Combine(Path.GetTempPath(),"bf4-servidor-tarefa.xml");File.WriteAllText(file,xml,System.Text.Encoding.Unicode);
+  try{if(Run("/Create /F /TN \""+Task+"\" /XML \""+file+"\"")!=0)throw new IOException("Não consegui deixar o painel sempre ligado (tarefa agendada). Abra o painel como administrador.");}
+  finally{try{File.Delete(file);}catch{}}
  }
 }
 }

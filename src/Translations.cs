@@ -209,6 +209,8 @@ public static partial class L {
 "Entrar no servidor do amigo","Join friend's server","Entrar al servidor del amigo",
 "Voltar ao meu servidor","Back to my server","Volver a mi servidor",
 "Conectar ao PC servidor","Connect to server PC","Conectar al PC servidor",
+"Desconectar do PC servidor","Disconnect server PC","Desconectar del PC servidor",
+"Desconectando do PC servidor…","Disconnecting from the server PC…","Desconectando del PC servidor…",
 "Procurando o PC servidor…","Looking for the server PC…","Buscando el PC servidor…",
 "Procurando o painel BF4 Servidor na rede…","Looking for the BF4 Server panel on the network…","Buscando el panel BF4 Servidor en la red…",
 "Nenhum PC com o painel BF4 Servidor respondeu na rede.","No PC with the BF4 Server panel answered on the network.","Ningún PC con el panel BF4 Servidor respondió en la red.",
