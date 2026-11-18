@@ -80,7 +80,7 @@ public sealed class Engine {
  }
  // Regras de entrada no firewall (rede privada), refeitas quando a versão das regras muda:
  // programas do backend e do servidor, porta RCON (o controle da Central) e o próprio painel (pedidos).
- const string FirewallVersion="v2";
+ const string FirewallVersion="v3";
  public void EnsureFirewall(Action<string> say){
   string marker=Path.Combine(Root,"firewall-ok.txt");string mark=FirewallVersion+"|"+ServerDir+"|"+Application.ExecutablePath;if(File.Exists(marker)&&File.ReadAllText(marker).Trim()==mark)return;
   say("Liberando o servidor e os pedidos da Central no firewall (rede privada)…");
@@ -89,6 +89,7 @@ public sealed class Engine {
   int rcon=25210;try{rcon=RconPort();}catch{}
   rules.Add("name=\"BF4 Servidor RCON TCP\" dir=in action=allow protocol=TCP localport="+rcon);
   rules.Add("name=\"BF4 Servidor pedidos TCP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=TCP localport=25230");
+  rules.Add("name=\"BF4 Servidor controle remoto TCP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=TCP localport=25212");
   rules.Add("name=\"BF4 Servidor busca UDP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=UDP localport=25231");
   foreach(var rule in rules){
    string name=rule.Substring(0,rule.IndexOf(" dir="));

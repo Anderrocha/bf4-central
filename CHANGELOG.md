@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Controle remoto do servidor (18/11/2026) — painel 0.5.21
+- O servidor do BF4 só aceita o RCON (25210) de dentro do próprio PC; a Central do PC de jogo ficava presa em "Conectando ao servidor por RCON".
+- Painel agora repassa o RCON: escuta na TCP 25212 da rede e encaminha para 127.0.0.1:25210. O "pronto" do pedido devolve a porta 25212, que a Central grava como RconPort. Regra de firewall nova (versão v3).
+
 ## Painel sempre ligado (18/11/2026) — 0.5.20
 - Painel BF4 Servidor: na primeira vez que abre (UAC uma vez só) se instala como "Sempre ligado (24 h)": tarefa agendada com gatilho no logon e a cada 1 minuto (uma cópia só), então volta sozinho após reinício, queda de energia ou crash, e fica perto do relógio só esperando pedidos.
 - O estado "ligado a pedido" fica salvo em arquivo: desconectar pela Central desliga o servidor mesmo se o painel caiu no meio.

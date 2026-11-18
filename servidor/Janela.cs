@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace BF4Servidor {
 public sealed class Painel : Form {
- readonly Engine engine;readonly Pedidos pedidos=new Pedidos();
+ readonly Engine engine;readonly Pedidos pedidos=new Pedidos();Repasse repasse;
  readonly Dot dot;readonly Label state,detail,ip,lastRequest;readonly PillButton toggle,copy;readonly Switch accept,light,autostart;readonly StatusStrip2 status;readonly NotifyIcon tray;readonly System.Windows.Forms.Timer timer;
  bool busy,quitting;
  // Guardado em arquivo: se o painel cair ou o PC reiniciar, "Desconectar" na Central ainda desliga o que foi ligado a pedido.
@@ -70,6 +70,7 @@ public sealed class Painel : Form {
   Task.Run(()=>{
    try{engine.EnsureFirewall(t=>Say(t,Theme.Accent));}catch(Exception ex){Say(ex.Message,Theme.Danger);}
    try{pedidos.Start();}catch(Exception ex){Say("Não consegui abrir a porta "+Pedidos.ControlPort+" para os pedidos: "+ex.Message,Theme.Danger);}
+   try{repasse=new Repasse(SafeRcon);repasse.Start();}catch(Exception ex){Say("Não consegui abrir a porta "+Repasse.Port+" do controle remoto: "+ex.Message,Theme.Danger);}
   });
  }
  void ShowPanel(){Show();WindowState=FormWindowState.Normal;Activate();}
@@ -78,7 +79,7 @@ public sealed class Painel : Form {
   if(busy){e.Cancel=true;Say("Aguarde terminar de ligar/desligar.",Theme.Accent);return;}
   if(!quitting&&e.CloseReason==CloseReason.UserClosing&&accept.Checked){e.Cancel=true;Hide();tray.ShowBalloonTip(3000,"BF4 Servidor","O painel ficou perto do relógio, esperando pedidos. Para sair de vez: botão direito no ícone → Sair do painel.",ToolTipIcon.Info);return;}
   if(engine.Running(Engine.Server).Count>0&&e.CloseReason==CloseReason.UserClosing&&MessageBox.Show(this,"O servidor continua ligado em segundo plano. Fechar só o painel?","BF4 Servidor",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes){e.Cancel=true;quitting=false;return;}
-  pedidos.Dispose();tray.Visible=false;tray.Dispose();timer.Dispose();
+  pedidos.Dispose();if(repasse!=null)repasse.Dispose();tray.Visible=false;tray.Dispose();timer.Dispose();
  }
  void Say(string text,Color mark){if(IsDisposed)return;if(InvokeRequired){try{BeginInvoke(new Action(()=>Say(text,mark)));}catch{}return;}status.Mark=mark;status.Text=text;}
  int SafeRcon(){try{return engine.RconPort();}catch{return 25210;}}
@@ -119,7 +120,7 @@ public sealed class Painel : Form {
    bool l=false;Invoke(new Action(()=>l=light.Checked));
    engine.Start(l,t=>{Say(t,Theme.Accent);remote(t);});startedByRequest=true;
    string address=Engine.LanIp();if(address==null)throw new IOException("Este PC saiu da rede.");
-   return address+"|"+engine.RconPort();
+   return address+"|"+(repasse!=null?Repasse.Port:engine.RconPort());
   }finally{Invoke(new Action(()=>{Busy(false,null);Refresh2();}));}
  }
  bool StopForRelease(){
