@@ -2,6 +2,10 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Firewall do painel (18/11/2026) — painel 0.5.23
+- Ao abrir, o painel remove regras de BLOQUEIO de entrada que o Windows cria quando o aviso "Permitir acesso?" é fechado ou cancelado (painel, backend e servidor).
+- Regras das portas do painel (25230, 25212, 25231) passam a ser por porta, sem depender do caminho do exe.
+
 ## Lista de servidores e entrada direta no PC servidor (18/11/2026) — Central 0.5.21 / painel 0.5.22
 - Painel: antes de ligar o servidor espera todas as portas do backend; depois de ligar confere a lista do Battlelog do backend ("Nenhum servidor encontrado") e, se o servidor não se registrou em 75 s, reinicia só o servidor (uma vez).
 - Painel: comando LOGS pela rede (só leitura) com o final dos logs do backend/servidor, para diagnóstico a partir do PC de jogo.

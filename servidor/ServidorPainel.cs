@@ -80,17 +80,26 @@ public sealed class Engine {
  }
  // Regras de entrada no firewall (rede privada), refeitas quando a versão das regras muda:
  // programas do backend e do servidor, porta RCON (o controle da Central) e o próprio painel (pedidos).
- const string FirewallVersion="v3";
+ const string FirewallVersion="v4";
+ // Quando o Windows pergunta "Permitir acesso?" e a pessoa fecha ou cancela, ele cria regras de BLOQUEIO
+ // para o programa, que vencem qualquer liberação. Remove esses bloqueios do painel, backend e servidor.
+ void RemoveBlocks(){
+  var programs=new[]{Application.ExecutablePath,Exe(Backend),Exe(Server)};
+  string list=String.Join(",",programs.Select(p=>"'"+p.Replace("'","''")+"'"));
+  string script="foreach($p in @("+list+")){Get-NetFirewallApplicationFilter -Program $p -ErrorAction SilentlyContinue | Get-NetFirewallRule -ErrorAction SilentlyContinue | Where-Object {$_.Action -eq 'Block' -and $_.Direction -eq 'Inbound'} | Remove-NetFirewallRule -ErrorAction SilentlyContinue}";
+  try{var info=new ProcessStartInfo("powershell.exe","-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand "+Convert.ToBase64String(Encoding.Unicode.GetBytes(script))){UseShellExecute=false,CreateNoWindow=true};using(var p=Process.Start(info))p.WaitForExit(30000);}catch{}
+ }
  public void EnsureFirewall(Action<string> say){
+  RemoveBlocks();
   string marker=Path.Combine(Root,"firewall-ok.txt");string mark=FirewallVersion+"|"+ServerDir+"|"+Application.ExecutablePath;if(File.Exists(marker)&&File.ReadAllText(marker).Trim()==mark)return;
   say("Liberando o servidor e os pedidos da Central no firewall (rede privada)…");
   var rules=new List<string>();
   foreach(var exe in new[]{Backend,Server})foreach(var proto in new[]{"TCP","UDP"})rules.Add("name=\"BF4 Servidor "+Path.GetFileNameWithoutExtension(exe)+" "+proto+"\" dir=in action=allow program=\""+Exe(exe)+"\" protocol="+proto);
   int rcon=25210;try{rcon=RconPort();}catch{}
   rules.Add("name=\"BF4 Servidor RCON TCP\" dir=in action=allow protocol=TCP localport="+rcon);
-  rules.Add("name=\"BF4 Servidor pedidos TCP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=TCP localport=25230");
-  rules.Add("name=\"BF4 Servidor controle remoto TCP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=TCP localport=25212");
-  rules.Add("name=\"BF4 Servidor busca UDP\" dir=in action=allow program=\""+Application.ExecutablePath+"\" protocol=UDP localport=25231");
+  rules.Add("name=\"BF4 Servidor pedidos TCP\" dir=in action=allow protocol=TCP localport=25230");
+  rules.Add("name=\"BF4 Servidor controle remoto TCP\" dir=in action=allow protocol=TCP localport=25212");
+  rules.Add("name=\"BF4 Servidor busca UDP\" dir=in action=allow protocol=UDP localport=25231");
   foreach(var rule in rules){
    string name=rule.Substring(0,rule.IndexOf(" dir="));
    Netsh("advfirewall firewall delete rule "+name);
