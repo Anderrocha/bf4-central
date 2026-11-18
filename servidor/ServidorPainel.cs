@@ -140,6 +140,9 @@ public sealed class Engine {
  void StopServerOnly(){foreach(var p in Running(Server)){try{p.CloseMainWindow();if(!p.WaitForExit(5000)){p.Kill();p.WaitForExit(10000);}}catch{}}}
  public void Start(bool light,Action<string> say){
   if(!File.Exists(Exe(Backend))||!File.Exists(Exe(Server)))throw new FileNotFoundException("A pasta Server está incompleta. Copie o pacote inteiro.");
+  // Sem o mod (dinput8.dll) o servidor abre, mas sem bots e sem se registrar no backend: some da lista do jogo.
+  var hook=new FileInfo(Exe("dinput8.dll"));
+  if(!hook.Exists||hook.Length<1000000)throw new FileNotFoundException("Falta o arquivo Server\\dinput8.dll (o mod dos bots). O antivírus deste PC provavelmente o removeu. Sem ele o servidor não aparece na lista. Veja Segurança do Windows → Histórico de proteção.");
   EnsureFirewall(say);
   string ip=LanIp();if(ip==null)throw new IOException("Este PC não está numa rede (sem IP com gateway). Conecte na mesma rede do PC de jogo.");
   SetServerIp(ip);
