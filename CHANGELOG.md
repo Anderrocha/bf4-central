@@ -2,6 +2,9 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Entrada direta pelo PC servidor desligada (18/11/2026) — Central 0.5.23
+- Com o servidor no outro PC, a entrada direta deixava o jogo em tela preta (nem chegava a conectar no backend). Voltou ao início normal: o jogo abre e você entra pela lista de servidores. O código da entrada remota ficou guardado para investigar depois.
+
 ## Ajustes dos bots por intensidade (18/11/2026) — Central 0.5.22 / painel 0.5.25
 - Aba Bots: botão "Ajustes dos bots…" abre uma janela com 14 comportamentos e níveis (Não/Sim ou Desligado/Baixa/Média/Alta): combate, bots contra bots, munição, caixas de apoio, granadas, lança-foguetes, veículos, nascer na linha de frente, nascer no esquadrão, reanimação, foco nas bandeiras, avanço, agilidade e chat. Perfis rápidos: Leve, Equilibrado, Intenso e Original do mod. Grava com backup pela mesma rotina dos perfis.
 - PC servidor: ao conectar, a Central manda os ajustes junto com o pedido; com a conexão ativa, "Salvar e aplicar" envia na hora e o painel reinicia só o servidor. O painel só aceita ajustes do PC que teve o pedido aceito, só troca chaves que já existem no ini e só aceita valores simples.
