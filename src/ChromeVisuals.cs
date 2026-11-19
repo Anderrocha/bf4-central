@@ -14,7 +14,8 @@ public sealed class BannerPanel : Panel {
  public BannerPanel(Image image){this.image=image;DoubleBuffered=true;BackColor=Theme.Ink;Dock=DockStyle.Fill;Margin=new Padding(0,0,0,12);}
  // Quadro da intro (tela final); null volta à imagem fixa.
  Image frame;
- public Image Frame{get{return frame;}set{var old=frame;frame=value;if(old!=null&&old!=value)old.Dispose();Invalidate();}}
+ public Image Frame{get{return frame;}set{var old=frame;frame=value;if(old!=null&&old!=value)old.Dispose();Invalidate(true);}}
+ // Invalidate(true): o título transparente por cima também redesenha; sem isso o vídeo não aparecia na abertura (19/11).
  protected override void OnPaintBackground(PaintEventArgs e){e.Graphics.Clear(Theme.Ink);
   if(frame!=null&&Width>0&&Height>0){float fs=Math.Max((float)Width/frame.Width,(float)Height/frame.Height);float fw=Width/fs,fh=Height/fs;e.Graphics.InterpolationMode=InterpolationMode.Bilinear;e.Graphics.DrawImage(frame,ClientRectangle,new RectangleF((frame.Width-fw)/2,(frame.Height-fh)*0.3f,fw,fh),GraphicsUnit.Pixel);return;}
   if(image==null||Width<1||Height<1)return;float scale=Math.Max((float)Width/image.Width,(float)Height/image.Height);float w=Width/scale,h=Height/scale;var source=new RectangleF((image.Width-w)/2,Math.Min(image.Height-h,image.Height*0.08f),w,h);e.Graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;e.Graphics.DrawImage(image,ClientRectangle,source,GraphicsUnit.Pixel);using(var shade=new LinearGradientBrush(ClientRectangle,Color.FromArgb(225,12,29,40),Color.FromArgb(70,12,29,40),0f))e.Graphics.FillRectangle(shade,ClientRectangle);}

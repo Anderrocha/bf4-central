@@ -37,19 +37,22 @@ public sealed class IntroPlayer : IDisposable {
  public void Dispose(){Stop(true);}
 }
 public sealed partial class Central {
- BannerPanel bannerPanel;IntroPlayer intro;
+ BannerPanel bannerPanel;IntroPlayer intro;bool startIntroPlayed,startIntroHooked;
  void IntroOnFinal(bool show){
   if(!EnsureIntro())return;
   // Um som por vez: a tela final cala a música do mapa; ao voltar, a intro para e a música do mapa volta.
-  if(show){MapMusic.Stop();if(IntroPlayer.Available)intro.Play(MapMusic.Enabled);}
-  else{intro.Stop();MusicFor(selectedChoice);}
+  // Só toca com a janela visível: antes, ao abrir já na tela final, o vídeo corria durante o carregamento (19/11).
+  if(show){MapMusic.Stop();if(IntroPlayer.Available&&Visible)intro.Play(MapMusic.Enabled);}
+  else{intro.Stop();if(!startIntroPlayed&&Visible)IntroOnStart();else MusicFor(selectedChoice);}
  }
  bool EnsureIntro(){if(bannerPanel==null)return false;if(intro==null){intro=new IntroPlayer(bannerPanel);FormClosed+=(s,e)=>intro.Dispose();}return true;}
- // Mesma intro ao abrir a Central (pedido de 19/11). Ao entrar na aba Servidor ela para e a música do mapa assume.
+ // Ao aparecer a janela: tela final toca a intro; nas abas, toca a intro de abertura.
+ void IntroOnShown(){if(!EnsureIntro())return;if(finalView){MapMusic.Stop();if(IntroPlayer.Available)intro.Play(MapMusic.Enabled);}else IntroOnStart();}
+ // Mesma intro na primeira vez que as abas aparecem (pedido de 19/11). Ao entrar na aba Servidor ela para e a música do mapa assume.
  void IntroOnStart(){
-  if(finalView||!EnsureIntro()||!IntroPlayer.Available)return;
-  MapMusic.Stop();intro.Play(MapMusic.Enabled);
-  tabs.SelectedIndexChanged+=(s,e)=>{if(OnServerTab&&!finalView)intro.Stop();};
+  if(finalView||startIntroPlayed||!EnsureIntro()||!IntroPlayer.Available)return;
+  startIntroPlayed=true;MapMusic.Stop();intro.Play(MapMusic.Enabled);
+  if(!startIntroHooked){startIntroHooked=true;tabs.SelectedIndexChanged+=(s,e)=>{if(OnServerTab&&!finalView)intro.Stop();};}
  }
 }
 }

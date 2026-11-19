@@ -2,6 +2,9 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Intro na abertura de verdade (19/11/2026) — Central 0.5.28
+- Com as 5 etapas concluídas a Central abre direto na tela final, e a intro começava durante o carregamento (som e vídeo corriam antes da janela aparecer). Agora só começa com a janela visível, e na primeira vez que as abas aparecem (abrindo ou clicando em Voltar) o vídeo toca também no banner das abas.
+
 ## Chat dos bots em português (19/11/2026) — Central 0.5.27
 - As falas do mod estão embutidas e criptografadas na dinput8.dll (inglês/russo/pinyin), sem opção de idioma. Nova opção "Idioma do chat" em Ajustes dos bots: Português desliga o chat do mod e a Central escreve as falas pelo RCON (admin.say), com palavrão, usando a intensidade do "Chat dos bots".
 - Reage a eventos do servidor: raiva após várias mortes, provocação, headshot, sequência de kills, suicídio, bot x jogador de verdade, resposta quando você escreve no chat (gg, bot, xingamento, risada), conversas à toa entre bots e falas de vencedor/perdedor no fim da rodada. Bot = sem GUID e ping 65535.
