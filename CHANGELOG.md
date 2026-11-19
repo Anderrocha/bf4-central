@@ -2,6 +2,12 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Chat dos bots em português (19/11/2026) — Central 0.5.27
+- As falas do mod estão embutidas e criptografadas na dinput8.dll (inglês/russo/pinyin), sem opção de idioma. Nova opção "Idioma do chat" em Ajustes dos bots: Português desliga o chat do mod e a Central escreve as falas pelo RCON (admin.say), com palavrão, usando a intensidade do "Chat dos bots".
+- Reage a eventos do servidor: raiva após várias mortes, provocação, headshot, sequência de kills, suicídio, bot x jogador de verdade, resposta quando você escreve no chat (gg, bot, xingamento, risada), conversas à toa entre bots e falas de vencedor/perdedor no fim da rodada. Bot = sem GUID e ping 65535.
+- A mensagem aparece como aviso do servidor com o nome do bot no texto. Funciona no servidor local e no PC servidor (pelo repasse). A Central precisa ficar aberta.
+- Testado ao vivo no servidor local: 5 falas em 1 minuto na intensidade Alta.
+
 ## Intro também na abertura (19/11/2026) — Central 0.5.26
 - O vídeo de intro da tela final agora também toca no banner quando a Central abre, com o som (se a música estiver ligada). Ao entrar na aba Servidor ele para e a música do mapa assume.
 

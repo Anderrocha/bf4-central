@@ -35,27 +35,35 @@ public static class BotTuning {
   new Tuning("Agilidade de movimento","Velocidade para virar e para se soltar quando ficam presos.",L3,new[]{"SteeringResponseSeconds","StuckSeconds"},new[]{"0.4","2.0"},new[]{"0.3","1.5"},new[]{"0.2","1.0"}),
   new Tuning("Chat dos bots","Mensagens dos bots no chat. Alta = conversa casual e resumo no fim da rodada.",L4,new[]{"BotMatchChat","BotCasualChat","BotRoundChat","BotMatchChatMinIntervalMs","BotMatchChatMaxIntervalMs"},
    new[]{"0","0","0","5000","8000"},new[]{"1","0","0","20000","30000"},new[]{"1","1","0","10000","15000"},new[]{"1","1","1","5000","8000"}),
+  // Não grava chave no ini: Português liga o chat da Central (ChatPt) e desliga o chat em inglês do mod.
+  new Tuning("Idioma do chat","Português = a Central escreve as falas (com palavrão) usando a intensidade acima e desliga o chat em inglês do mod. A Central precisa ficar aberta.",new[]{"Inglês (mod)","Português"},new string[0],new string[0],new string[0]),
  };
+ public const int ChatRow=13,LanguageRow=14;
  // Perfis rápidos: um nível por ajuste, na ordem de All.
  public static readonly string[] PresetNames={"Leve","Equilibrado","Intenso","Original do mod"};
  public static readonly int[][] Presets={
-  new[]{1,1,2,1,1,0,0,0,1,1,2,0,1,0},
-  new[]{1,1,3,2,2,1,1,0,1,2,2,1,2,1},
-  new[]{1,1,3,3,3,1,1,1,1,3,3,2,2,2},
-  new[]{1,1,3,3,3,1,1,1,1,2,3,2,2,0},
+  new[]{1,1,2,1,1,0,0,0,1,1,2,0,1,0,1},
+  new[]{1,1,3,2,2,1,1,0,1,2,2,1,2,1,1},
+  new[]{1,1,3,3,3,1,1,1,1,3,3,2,2,2,1},
+  new[]{1,1,3,3,3,1,1,1,1,2,3,2,2,0,0},
  };
  static string Ini(string root){return Path.Combine(root,"Server\\dinput8_bf4hook.ini");}
  public static string Text(string root){return Config.Decode(File.ReadAllBytes(Ini(root)));}
  // Nível atual de cada ajuste (-1 = valores que não batem com nenhum nível: personalizado).
  public static int[] Detect(string text){
-  return All.Select(t=>{for(int i=0;i<t.Values.Length;i++)if(t.Values[i].All(kv=>Same(Config.Read(text,kv.Key),kv.Value)))return i;return -1;}).ToArray();
+  var r=All.Select(t=>{for(int i=0;i<t.Values.Length;i++)if(t.Values[i].All(kv=>Same(Config.Read(text,kv.Key),kv.Value)))return i;return -1;}).ToArray();
+  if(ChatPt.Enabled&&r[ChatRow]==0){r[LanguageRow]=1;r[ChatRow]=ChatPt.Level;}else r[LanguageRow]=0;
+  return r;
  }
  static bool Same(string a,string b){if(a==null)return false;double x,y;var c=System.Globalization.CultureInfo.InvariantCulture;if(Double.TryParse(a,System.Globalization.NumberStyles.Float,c,out x)&&Double.TryParse(b,System.Globalization.NumberStyles.Float,c,out y))return Math.Abs(x-y)<1e-9;return a==b;}
  // Grava com backup (mesma rotina dos perfis). Ajustes sem escolha (-1) ficam como estão.
  public static string Save(string root,int[] choice){
   var p=new Profile("Ajustes finos","","",Profile.All[2].Values.Values.ToArray());p.Values.Clear();
-  for(int i=0;i<All.Length;i++)if(choice[i]>=0)foreach(var kv in All[i].Values[choice[i]])p.Values[kv.Key]=kv.Value;
-  return Config.Save(root,p,false);
+  bool pt=choice[LanguageRow]==1;
+  for(int i=0;i<All.Length;i++){int level=pt&&i==ChatRow?0:choice[i];if(level>=0)foreach(var kv in All[i].Values[level])p.Values[kv.Key]=kv.Value;}
+  string backup=Config.Save(root,p,false);
+  ChatPt.Set(pt,choice[ChatRow]<0?2:choice[ChatRow]);
+  return backup;
  }
 }
 // Janela "Ajustes dos bots".
