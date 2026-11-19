@@ -12,8 +12,8 @@ public static class ChatTests {
   var said=new List<string>();
   for(int i=0;i<400;i++){brain.OnKill("Bot"+(i%5*2),"Bot"+(i%5*2+1),"U_AWS",i%7==0);if(i%9==0)brain.OnKill("Bot2","Jogador","U_M320_HE",false);if(i%11==0)brain.OnKill("Jogador","Bot5","U_AK12",true);brain.Tick();t=t.AddSeconds(2);said.AddRange(brain.Due());}
   if(said.Count<20)throw new Exception("Chat: poucas falas ("+said.Count+")");
-  if(said.Any(l=>l.Length>127||!l.StartsWith("[")||l.Contains("{")))throw new Exception("Chat: fala mal formada");
-  if(said.Any(l=>l.StartsWith("[Jogador]")))throw new Exception("Chat: falou em nome do jogador");
+  if(said.Any(l=>l.Length>127||!l.Contains(": ")||l.StartsWith("[")||l.Contains("{")))throw new Exception("Chat: fala mal formada");
+  if(said.Any(l=>l.StartsWith("Jogador:")))throw new Exception("Chat: falou em nome do jogador");
   // Intervalo mínimo: em 800 s na intensidade alta (5-8 s) não pode passar de ~170 falas de morte.
   if(said.Count>260)throw new Exception("Chat: falas demais ("+said.Count+")");
   brain.OnChat("Jogador","gg time","all");t=t.AddSeconds(4);var reply=brain.Due();

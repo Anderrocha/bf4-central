@@ -88,7 +88,7 @@ public sealed class ChatBrain {
  public bool IsBot(string name){return !String.IsNullOrEmpty(name)&&!Humans.Contains(name);}
  static string Weapon(string w){if(String.IsNullOrEmpty(w))return "tiro";if(w.StartsWith("U_"))w=w.Substring(2);return w.Replace('_',' ');}
  public static string Fill(string text,string k,string v,string w,int n,string h){return text.Replace("{k}",k??"").Replace("{v}",v??"").Replace("{w}",Weapon(w)).Replace("{n}",n.ToString()).Replace("{h}",h??"");}
- public static string Format(string who,string text){string s="["+who+"]: "+text;return s.Length>127?s.Substring(0,127):s;}
+ public static string Format(string who,string text){string s=who+": "+text; /* sem colchetes: o jogo já mostra [ADMINISTRADOR] antes (19/11) */return s.Length>127?s.Substring(0,127):s;}
  bool Ready(){return now()>=lastSay;}
  void Say(string who,string text,int delayMs){
   if(String.IsNullOrEmpty(who)||Level<=0)return;DateTime at=now().AddMilliseconds(delayMs);

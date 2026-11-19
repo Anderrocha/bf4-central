@@ -2,6 +2,9 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Chat sem colchetes no nome (19/11/2026) — Central 0.5.29
+- O jogo sempre mostra [ADMINISTRADOR] antes de mensagens do admin.say (não há comando RCON para falar como jogador). Para limpar a linha, o nome do bot sai sem colchetes: "[ADMINISTRADOR] Sweet Jaguar: cacete, que fase".
+
 ## Intro na abertura de verdade (19/11/2026) — Central 0.5.28
 - Com as 5 etapas concluídas a Central abre direto na tela final, e a intro começava durante o carregamento (som e vídeo corriam antes da janela aparecer). Agora só começa com a janela visível, e na primeira vez que as abas aparecem (abrindo ou clicando em Voltar) o vídeo toca também no banner das abas.
 
