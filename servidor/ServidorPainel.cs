@@ -179,6 +179,15 @@ public sealed class Engine {
   string tmp=path+".tmp";File.WriteAllText(tmp,String.Concat(lines),new UTF8Encoding(false));File.Copy(tmp,path,true);File.Delete(tmp);
   return true;
  }
+ // Rotação vinda da Central: linhas "Mapa Modo Rodadas" (só letras, números e _), até 1000. Backup na primeira vez.
+ public string WriteMapList(string content){
+  var lines=content.Replace("\r","").Split(new[]{'\n'},StringSplitOptions.RemoveEmptyEntries).Select(l=>l.Trim()).Where(l=>l.Length>0).ToList();
+  if(lines.Count<1||lines.Count>1000||lines.Any(l=>!Regex.IsMatch(l,"^[A-Za-z0-9_]{1,40} [A-Za-z0-9_]{1,40} [1-9][0-9]?$")))throw new InvalidDataException("Rotação inválida.");
+  string file=Path.Combine(ServerDir,"Instance","Admin","MapList.txt");string previous=File.Exists(file)?File.ReadAllText(file):"";
+  string backup=file+".antes-central";if(File.Exists(file)&&!File.Exists(backup))File.Copy(file,backup);
+  string tmp=file+".tmp";File.WriteAllText(tmp,String.Join("\r\n",lines)+"\r\n",new UTF8Encoding(false));File.Copy(tmp,file,true);File.Delete(tmp);
+  return previous;
+ }
  // Reinicia só o servidor com bots (o backend continua) e confere se voltou para a lista.
  public void RestartServerOnly(bool light,Action<string> say){
   if(Running(Server).Count==0)return;

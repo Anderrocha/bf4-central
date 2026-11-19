@@ -27,6 +27,9 @@ public sealed class Pedidos : IDisposable {
  public Func<string,bool> ApplyHook;              // grava os ajustes dos bots recebidos (só chaves conhecidas); true = mudou
  public Func<Action<string>,string> RestartServer;// reinicia só o servidor (para valer os ajustes)
  volatile string lastAccepted;                   // IP do PC de jogo que teve o pedido aceito
+ public string LastAccepted{get{return lastAccepted;}set{lastAccepted=value;}}
+ public Action<string> Accepted;                 // guarda o IP aceito (sobrevive a reinício do painel)
+ public Func<string,string> WriteMapList;         // grava Instance\Admin\MapList.txt; devolve o conteúdo anterior
  public Func<string> Logs;                      // final dos logs do backend/servidor (diagnóstico pela Central)
  public Action<string> Log;
  public volatile bool Accepting=true;
@@ -61,6 +64,12 @@ public sealed class Pedidos : IDisposable {
      case "LOGS":writer.WriteLine("LOGS|"+(Logs==null?"":Logs().Replace("\r","").Replace("|","/").Replace("\n","\u0001")));return;
      case "PING":writer.WriteLine("PONG|"+Environment.MachineName+"|"+(State==null?"":State()));return;
      case "RELEASE":{bool stopped=StopIfOurs!=null&&StopIfOurs();writer.WriteLine("OK|"+(stopped?"Servidor desligado no outro PC.":"Nada para desligar."));Say(who+" ("+ip+") liberou este PC"+(stopped?"; servidor desligado.":"."));return;}
+     case "MAPLIST":{
+      if(ip!=lastAccepted){writer.WriteLine("DENIED|Este PC não está conectado ao servidor daqui. Use Conectar ao PC servidor primeiro.");return;}
+      if(parts.Length<5||WriteMapList==null){writer.WriteLine("FAILED|Rotação vazia.");return;}
+      try{string previous=WriteMapList(Encoding.UTF8.GetString(Convert.FromBase64String(parts[4])));writer.WriteLine("OK|"+Convert.ToBase64String(Encoding.UTF8.GetBytes(previous)));Say("Rotação de mapas atualizada pela Central de "+who+".");}
+      catch(Exception ex){writer.WriteLine("FAILED|"+Clean(ex.Message));}
+      return;}
      case "HOOK":{
       if(ip!=lastAccepted){writer.WriteLine("DENIED|Este PC não está conectado ao servidor daqui. Use Conectar ao PC servidor primeiro.");return;}
       if(parts.Length<5||ApplyHook==null){writer.WriteLine("FAILED|Ajustes vazios.");return;}
@@ -82,7 +91,7 @@ public sealed class Pedidos : IDisposable {
      writer.WriteLine("WAIT");Say("Pedido de "+who+" ("+ip+"). Aguardando sua resposta…");
      bool ok=Ask!=null&&Ask(who,ip);
      if(!ok){writer.WriteLine("DENIED|O dono do outro PC recusou o pedido.");Say("Você recusou o pedido de "+who+".");return;}
-     writer.WriteLine("ACCEPTED");Say("Pedido de "+who+" aceito. Ligando o servidor…");lastAccepted=ip;
+     writer.WriteLine("ACCEPTED");Say("Pedido de "+who+" aceito. Ligando o servidor…");lastAccepted=ip;if(Accepted!=null)try{Accepted(ip);}catch{}
      if(parts.Length>4&&ApplyHook!=null){try{if(ApplyHook(Encoding.UTF8.GetString(Convert.FromBase64String(parts[4]))))writer.WriteLine("STATUS|Ajustes dos bots da Central gravados aqui.");}catch(Exception ex){writer.WriteLine("STATUS|Ajustes dos bots não aplicados: "+Clean(ex.Message));}}
      client.ReceiveTimeout=0;
      string ready=StartServer(text=>{try{writer.WriteLine("STATUS|"+Clean(text));}catch{}});

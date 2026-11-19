@@ -96,6 +96,30 @@ public static class RemotePc {
    }
   }
  }
+ // Troca o arquivo de rotação (Instance\Admin\MapList.txt) no PC servidor; devolve o conteúdo anterior.
+ // O servidor do mod ignora "mapList.clear" pelo RCON, então a rotação é gravada em arquivo e carregada com "mapList.load".
+ public static string SendMapList(string host,string who,string content){
+  TcpClient client;try{client=Open(host,ControlPort,3000);}catch{throw new IOException("O PC servidor ("+host+") não respondeu.");}
+  using(client){
+   client.ReceiveTimeout=30000;var stream=client.GetStream();
+   var writer=new StreamWriter(stream,new UTF8Encoding(false)){AutoFlush=true,NewLine="\n"};var reader=new StreamReader(stream,new UTF8Encoding(false));
+   writer.WriteLine("BF4CENTRAL|1|MAPLIST|"+who.Replace("|","/")+"|"+Convert.ToBase64String(Encoding.UTF8.GetBytes(content)));
+   string line=reader.ReadLine();if(line==null)throw new IOException("O PC servidor encerrou sem responder.");
+   var p=line.Split('|');if(p[0]=="OK")return p.Length>1?Encoding.UTF8.GetString(Convert.FromBase64String(p[1])):"";
+   throw new IOException(p.Length>1&&p[1].Length>0?p[1]:"O PC servidor recusou a rotação.");
+  }
+ }
+ public static void SaveRotation(string host,string who,Rcon r,List<RotationEntry> baseline,List<RotationEntry> target,string backup){
+  string serialized=LocalRotation.Serialize(target);var live=r.Maps();
+  if(!Rcon.Same(baseline,live))throw new IOException("A rotação mudou em outro painel. Atualize antes de salvar.");
+  Directory.CreateDirectory(Path.GetDirectoryName(backup));File.WriteAllText(backup,new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(live),Encoding.UTF8);
+  string previous=SendMapList(host,who,serialized);File.WriteAllText(backup+".MapList.txt",previous,Encoding.UTF8);
+  try{r.Command("mapList.load");if(!Rcon.Same(target,r.Maps()))throw new IOException("O servidor não confirmou a rotação carregada do arquivo.");}
+  catch(Exception ex){
+   try{SendMapList(host,who,LocalRotation.Serialize(live));r.Command("mapList.load");}catch(Exception rollback){throw new IOException("Falha ao carregar/restaurar no PC servidor. Backup: "+backup+". "+rollback.Message);}
+   throw new IOException("A rotação anterior foi restaurada no PC servidor. "+ex.Message);
+  }
+ }
  public static void Release(string host,string who){
   try{using(var client=Open(host,ControlPort,2000)){client.ReceiveTimeout=30000;var stream=client.GetStream();var writer=new StreamWriter(stream,new UTF8Encoding(false)){AutoFlush=true,NewLine="\n"};writer.WriteLine("BF4CENTRAL|1|RELEASE|"+who.Replace("|","/"));new StreamReader(stream).ReadLine();}}catch{}
  }

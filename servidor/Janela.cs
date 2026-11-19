@@ -50,13 +50,15 @@ public sealed class Painel : Form {
   Resize+=(s,e)=>{if(WindowState==FormWindowState.Minimized&&accept.Checked){Hide();tray.ShowBalloonTip(3000,"BF4 Servidor","O painel continua aqui, esperando pedidos da Central.",ToolTipIcon.Info);}};
   FormClosing+=OnClosing;
   timer=new System.Windows.Forms.Timer{Interval=2000};timer.Tick+=(s,e)=>Refresh2();timer.Start();
-  pedidos.Accepting=accept.Checked;pedidos.Log=t=>Say(t,Theme.Ink);pedidos.State=()=>state.Text;pedidos.Logs=engine.LogTail;pedidos.Ask=AskOwner;pedidos.StartServer=StartForRequest;pedidos.ApplyHook=ApplyHookFromCentral;pedidos.RestartServer=RestartForHook;pedidos.StopIfOurs=StopForRelease;
+  pedidos.Accepting=accept.Checked;pedidos.Log=t=>Say(t,Theme.Ink);pedidos.State=()=>state.Text;pedidos.Logs=engine.LogTail;pedidos.Ask=AskOwner;pedidos.StartServer=StartForRequest;pedidos.ApplyHook=ApplyHookFromCentral;pedidos.WriteMapList=engine.WriteMapList;pedidos.LastAccepted=ReadText("ultimo-pc-aceito.txt");pedidos.Accepted=ip2=>WriteText("ultimo-pc-aceito.txt",ip2);pedidos.RestartServer=RestartForHook;pedidos.StopIfOurs=StopForRelease;
   Load+=(s,e)=>Boot();
   Refresh2();
   if(!Directory.Exists(engine.ServerDir))Say("Pasta Server não encontrada ao lado do painel. Copie o pacote inteiro.",Theme.Danger);else Say("Pronto. Deixe este painel aberto para a Central conseguir pedir o servidor.",Theme.Ink);
  }
  protected override void SetVisibleCore(bool value){if(startHidden&&!IsHandleCreated){CreateHandle();value=false;OnLoad(EventArgs.Empty);}base.SetVisibleCore(value);}
  static Image Art(){try{using(var s=typeof(Painel).Assembly.GetManifestResourceStream("BF4Servidor.Banner")){if(s!=null)return new Bitmap(Image.FromStream(s));}}catch{}return null;}
+ string ReadText(string file){try{string f=Path.Combine(engine.Root,file);return File.Exists(f)?File.ReadAllText(f).Trim():null;}catch{return null;}}
+ void WriteText(string file,string v){try{File.WriteAllText(Path.Combine(engine.Root,file),v);}catch{}}
  bool Flag(string file,bool fallback){try{string f=Path.Combine(engine.Root,file);return File.Exists(f)?File.ReadAllText(f).Trim()=="1":fallback;}catch{return fallback;}}
  void SetFlag(string file,bool v){try{File.WriteAllText(Path.Combine(engine.Root,file),v?"1":"0");}catch{}}
  HashSet<string> Trusted(){try{string f=Path.Combine(engine.Root,"pcs-confiaveis.txt");return new HashSet<string>(File.Exists(f)?File.ReadAllLines(f).Select(x=>x.Trim()).Where(x=>x.Length>0):new string[0]);}catch{return new HashSet<string>();}}
