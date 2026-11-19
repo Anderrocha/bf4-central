@@ -129,14 +129,17 @@ public static partial class OneClick {
 }
 public sealed partial class Central {
  string RemoteWho(){string name=user!=null&&user.Text.Trim().Length>0?user.Text.Trim():"Jogador";return name+" ("+Environment.MachineName+")";}
- bool PointsAway(){var c=Settings.Read(root);return Settings.Get(c,"BlazeIP","127.0.0.1")!="127.0.0.1"||Settings.Get(c,"RconHost","127.0.0.1")!="127.0.0.1";}
+ bool PointsAway(){var c=Settings.Read(root);return Settings.Get(c,"BlazeIP","127.0.0.1")!="127.0.0.1"||Settings.Get(c,"RconHost","127.0.0.1")!="127.0.0.1"||Settings.Get(c,"RconPort","25210")==RemoteRconPort;}
+ const string RemoteRconPort="25212";
+ /* o repasse do PC servidor usa 25212; o servidor deste PC escuta RCON em 25210 (bug 18/11: voltar deixava 25212 e travava em "Preparando servidor local") */
+ void SaveLocalRcon(){Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"},{"RconPort","25210"}});}
  // Volta jogo e controle para o servidor deste PC (o jogo já foi fechado ou confirmado antes).
  void BackToLocal(){
   string host=RemotePc.ActiveHost();if(host!=null){RemotePc.Release(host,RemoteWho());RemotePc.ClearActive();}
-  if(PointsAway()){Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}
+  if(PointsAway()){var c=Settings.Read(root);if(Settings.Get(c,"BlazeIP","127.0.0.1")!="127.0.0.1")Friends.ReturnLocal(root);SaveLocalRcon();}
  }
  // "Voltar ao meu servidor": libera o PC servidor (se houver) e aponta jogo e controle para este PC.
- void ReturnLocalAll(){string host=RemotePc.ActiveHost();if(host!=null){RemotePc.Release(host,RemoteWho());RemotePc.ClearActive();}Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}
+ void ReturnLocalAll(){string host=RemotePc.ActiveHost();if(host!=null){RemotePc.Release(host,RemoteWho());RemotePc.ClearActive();}Friends.ReturnLocal(root);SaveLocalRcon();}
  // Botão "Ajustes dos bots…" (aba Bots): grava aqui e, com o PC servidor conectado, envia para lá.
  void OpenBotTuning(){
   if(busy)return;
@@ -190,7 +193,7 @@ public sealed partial class Central {
   string host=RemotePc.ActiveHost();if(host==null)return true;
   var c=Settings.Read(root);if(Settings.Get(c,"BlazeIP","127.0.0.1")!=host){RemotePc.ClearActive();return true;}
   if(await Task.Run(()=>RemotePc.Reachable(host,10040,2000)))return true;
-  try{await Task.Run(()=>{RemotePc.ClearActive();if(!OneClick.IsGameOpen(root)&&PointsAway()){Friends.ReturnLocal(root);Settings.Save(root,new Dictionary<string,string>{{"RconHost","127.0.0.1"}});}});LoadSettings();}catch(Exception ex){Status(ex.Message,true);return false;}
+  try{await Task.Run(()=>{RemotePc.ClearActive();if(!OneClick.IsGameOpen(root)&&PointsAway()){Friends.ReturnLocal(root);SaveLocalRcon();}});LoadSettings();}catch(Exception ex){Status(ex.Message,true);return false;}
   RemoteLabel();Status("O PC servidor ("+host+") não está ligado. Voltei para o servidor deste PC."+LocalAdvice,true);
   return true;
  }

@@ -2,6 +2,9 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Voltar ao meu servidor travava (18/11/2026) — Central 0.5.25
+- Ao desconectar do PC servidor, a Central devolvia o IP para 127.0.0.1 mas deixava a porta RCON em 25212 (a do repasse do outro PC). O servidor deste PC escuta em 25210, então tudo ficava parado em "Preparando servidor local…". Agora voltar restaura a porta 25210, e uma porta 25212 sobrando também é tratada como "apontando para fora".
+
 ## Entrada direta pelo PC servidor desligada (18/11/2026) — Central 0.5.23
 - Com o servidor no outro PC, a entrada direta deixava o jogo em tela preta (nem chegava a conectar no backend). Voltou ao início normal: o jogo abre e você entra pela lista de servidores. O código da entrada remota ficou guardado para investigar depois.
 
