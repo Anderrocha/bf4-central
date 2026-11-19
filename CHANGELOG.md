@@ -2,6 +2,9 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Intro também na abertura (19/11/2026) — Central 0.5.26
+- O vídeo de intro da tela final agora também toca no banner quando a Central abre, com o som (se a música estiver ligada). Ao entrar na aba Servidor ele para e a música do mapa assume.
+
 ## Voltar ao meu servidor travava (18/11/2026) — Central 0.5.25
 - Ao desconectar do PC servidor, a Central devolvia o IP para 127.0.0.1 mas deixava a porta RCON em 25212 (a do repasse do outro PC). O servidor deste PC escuta em 25210, então tudo ficava parado em "Preparando servidor local…". Agora voltar restaura a porta 25210, e uma porta 25212 sobrando também é tratada como "apontando para fora".
 

@@ -2,5 +2,5 @@
 [assembly: AssemblyTitle("BF4 Central")]
 [assembly: AssemblyDescription("Central local: jogo, mapas, bots e amigos na rede local")]
 [assembly: AssemblyProduct("BF4 Central")]
-[assembly: AssemblyVersion("0.5.25.0")]
-[assembly: AssemblyFileVersion("0.5.25.0")]
+[assembly: AssemblyVersion("0.5.26.0")]
+[assembly: AssemblyFileVersion("0.5.26.0")]

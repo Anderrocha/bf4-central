@@ -39,10 +39,17 @@ public sealed class IntroPlayer : IDisposable {
 public sealed partial class Central {
  BannerPanel bannerPanel;IntroPlayer intro;
  void IntroOnFinal(bool show){
-  if(bannerPanel==null)return;if(intro==null){intro=new IntroPlayer(bannerPanel);FormClosed+=(s,e)=>intro.Dispose();}
+  if(!EnsureIntro())return;
   // Um som por vez: a tela final cala a música do mapa; ao voltar, a intro para e a música do mapa volta.
   if(show){MapMusic.Stop();if(IntroPlayer.Available)intro.Play(MapMusic.Enabled);}
   else{intro.Stop();MusicFor(selectedChoice);}
+ }
+ bool EnsureIntro(){if(bannerPanel==null)return false;if(intro==null){intro=new IntroPlayer(bannerPanel);FormClosed+=(s,e)=>intro.Dispose();}return true;}
+ // Mesma intro ao abrir a Central (pedido de 19/11). Ao entrar na aba Servidor ela para e a música do mapa assume.
+ void IntroOnStart(){
+  if(finalView||!EnsureIntro()||!IntroPlayer.Available)return;
+  MapMusic.Stop();intro.Play(MapMusic.Enabled);
+  tabs.SelectedIndexChanged+=(s,e)=>{if(OnServerTab&&!finalView)intro.Stop();};
  }
 }
 }
