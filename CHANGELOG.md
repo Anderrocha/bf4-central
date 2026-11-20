@@ -2,6 +2,11 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Tela final interativa (20/11/2026) — Central 0.5.31
+- O vídeo da tela final ficou grande (proporção 16:9, ocupa a largura da janela) e, ao terminar, o jogo inicia sozinho.
+- Novo botão "Pular vídeo ⏭" ao lado de "Iniciar tudo e jogar": para o vídeo e inicia na hora.
+- Nova chave "Iniciar o jogo ao fim do vídeo" (fica salva em intro-autostart.txt); desligada, o vídeo toca e a pessoa inicia quando quiser. Mostra a contagem dos segundos restantes.
+
 ## Liberação pelo Sócio Premiado (20/11/2026) — Central 0.5.30
 - A doação virou condição de uso: "Iniciar tudo e jogar" só funciona depois que a pessoa entra com a conta do Sócio Premiado (telefone + senha do site) e a conta tem pelo menos um pagamento Pix confirmado (pedido com txid ou recarga de saldo de sócio). Administradores do site ficam liberados.
 - O site responde com uma licença assinada (RSA-2048, SHA-256) presa a este PC (MachineGuid); a Central guarda em %LOCALAPPDATA%\BF4BotLauncher\licenca.txt e não pergunta de novo, mesmo sem internet. Telefone e senha não são guardados.

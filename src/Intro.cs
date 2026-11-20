@@ -22,6 +22,10 @@ public sealed class IntroPlayer : IDisposable {
  [DllImport("winmm.dll",CharSet=CharSet.Unicode)]static extern int mciSendString(string command,System.Text.StringBuilder result,int length,IntPtr callback);
  const string Alias="bf4intro";
  readonly BannerPanel banner;Timer timer;Stopwatch clock;IntroClip clip;int shown=-1;bool sound;
+ // Avisa quando o vídeo chega ao fim (não dispara se for parado antes).
+ public event Action Finished;
+ public bool Playing{get{return timer!=null;}}
+ public int SecondsLeft{get{return clip==null||clock==null?0:Math.Max(0,(int)Math.Ceiling(clip.Count/(double)clip.Fps-clock.Elapsed.TotalSeconds));}}
  public IntroPlayer(BannerPanel banner){this.banner=banner;}
  public static bool Available{get{return IntroClip.Load()!=null;}}
  public void Play(bool withSound){
@@ -29,7 +33,7 @@ public sealed class IntroPlayer : IDisposable {
   string audio=Path.Combine(IntroClip.Folder,"intro.mp3");
   if(withSound&&File.Exists(audio)&&!audio.Contains("\"")&&mciSendString("open \""+audio+"\" type mpegvideo alias "+Alias,null,0,IntPtr.Zero)==0){mciSendString("setaudio "+Alias+" volume to 700",null,0,IntPtr.Zero);sound=mciSendString("play "+Alias,null,0,IntPtr.Zero)==0;if(!sound)mciSendString("close "+Alias,null,0,IntPtr.Zero);}
   clock=Stopwatch.StartNew();shown=-1;ShowAt(0);
-  timer=new Timer{Interval=15};timer.Tick+=(s,e)=>{int i=(int)(clock.ElapsedMilliseconds*clip.Fps/1000);if(i>=clip.Count-1){ShowAt(clip.Count-1);timer.Stop();return;}ShowAt(i);};timer.Start();
+  timer=new Timer{Interval=15};timer.Tick+=(s,e)=>{int i=(int)(clock.ElapsedMilliseconds*clip.Fps/1000);if(i>=clip.Count-1){ShowAt(clip.Count-1);timer.Dispose();timer=null;var done=Finished;if(done!=null)done();return;}ShowAt(i);};timer.Start();
  }
  void ShowAt(int i){if(i==shown||banner.IsDisposed)return;var img=clip.Frame(i);if(img==null)return;shown=i;banner.Frame=img;}
  // Para o som; keepLast mantém o quadro atual, senão volta à imagem fixa.
@@ -42,12 +46,12 @@ public sealed partial class Central {
   if(!EnsureIntro())return;
   // Um som por vez: a tela final cala a música do mapa; ao voltar, a intro para e a música do mapa volta.
   // Só toca com a janela visível: antes, ao abrir já na tela final, o vídeo corria durante o carregamento (19/11).
-  if(show){MapMusic.Stop();if(IntroPlayer.Available&&Visible)intro.Play(MapMusic.Enabled);}
-  else{intro.Stop();if(!startIntroPlayed&&Visible)IntroOnStart();else MusicFor(selectedChoice);}
+  if(show){MapMusic.Stop();if(IntroPlayer.Available&&Visible){intro.Play(MapMusic.Enabled);BeginIntroWatch();}}
+  else{introWatching=false;RefreshIntroControls();intro.Stop();if(!startIntroPlayed&&Visible)IntroOnStart();else MusicFor(selectedChoice);}
  }
- bool EnsureIntro(){if(bannerPanel==null)return false;if(intro==null){intro=new IntroPlayer(bannerPanel);FormClosed+=(s,e)=>intro.Dispose();}return true;}
+ bool EnsureIntro(){if(bannerPanel==null)return false;if(intro==null){intro=new IntroPlayer(bannerPanel);intro.Finished+=IntroFinished;FormClosed+=(s,e)=>intro.Dispose();}return true;}
  // Ao aparecer a janela: tela final toca a intro; nas abas, toca a intro de abertura.
- void IntroOnShown(){if(!EnsureIntro())return;if(finalView){MapMusic.Stop();if(IntroPlayer.Available)intro.Play(MapMusic.Enabled);}else IntroOnStart();}
+ void IntroOnShown(){if(!EnsureIntro())return;if(finalView){MapMusic.Stop();if(IntroPlayer.Available){intro.Play(MapMusic.Enabled);BeginIntroWatch();}}else IntroOnStart();}
  // Mesma intro na primeira vez que as abas aparecem (pedido de 19/11). Ao entrar na aba Servidor ela para e a música do mapa assume.
  void IntroOnStart(){
   if(finalView||startIntroPlayed||!EnsureIntro()||!IntroPlayer.Available)return;
