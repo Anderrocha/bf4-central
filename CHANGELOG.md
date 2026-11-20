@@ -2,6 +2,12 @@
 
 Registro organizado a partir do trabalho de 7 e 8 de novembro de 2026. Esta importação preserva o estado atual do código; não fabrica commits retroativos.
 
+## Liberação pelo Sócio Premiado (20/11/2026) — Central 0.5.30
+- A doação virou condição de uso: "Iniciar tudo e jogar" só funciona depois que a pessoa entra com a conta do Sócio Premiado (telefone + senha do site) e a conta tem pelo menos um pagamento Pix confirmado (pedido com txid ou recarga de saldo de sócio). Administradores do site ficam liberados.
+- O site responde com uma licença assinada (RSA-2048, SHA-256) presa a este PC (MachineGuid); a Central guarda em %LOCALAPPDATA%\BF4BotLauncher\licenca.txt e não pergunta de novo, mesmo sem internet. Telefone e senha não são guardados.
+- O cartão do Sócio Premiado saiu da tela final e foi para a etapa 1 (Instalação), com "Ir para o site" e "Entrar com minha conta". As outras etapas continuam livres para configurar; sem licença a Central abre nas etapas, não na tela final.
+- Verificação no site: central-licenca.php (limite de 10 tentativas por IP a cada 15 minutos). A chave privada fica fora do public_html.
+
 ## Chat sem colchetes no nome (19/11/2026) — Central 0.5.29
 - O jogo sempre mostra [ADMINISTRADOR] antes de mensagens do admin.say (não há comando RCON para falar como jogador). Para limpar a linha, o nome do bot sai sem colchetes: "[ADMINISTRADOR] Sweet Jaguar: cacete, que fase".
 

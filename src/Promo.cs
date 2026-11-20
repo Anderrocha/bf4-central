@@ -4,23 +4,29 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 namespace BF4Bots {
-// Cartão do projeto Sócio Premiado na tela final: imagem, convite, link e botão para o site.
+// Cartão do Sócio Premiado na etapa 1: mostra se a Central está liberada (compra via Pix) e leva ao site ou ao login.
 public sealed class PromoCard : Panel {
  public const string Url="https://sociopremiado.com.br/";
  static readonly Color Green=ColorTranslator.FromHtml("#00A653"),DarkGreen=ColorTranslator.FromHtml("#0B7A43");
  readonly Image art;
+ readonly Label message;readonly ActionButton login;readonly Action refresh;
  public PromoCard(){
   DoubleBuffered=true;BackColor=Theme.Background;Padding=new Padding(14,10,16,10);
   using(var s=typeof(PromoCard).Assembly.GetManifestResourceStream("BF4Bots.Promo")){if(s!=null)try{art=new Bitmap(Image.FromStream(s));}catch{art=null;}}
   var grid=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=3,RowCount=3,BackColor=Theme.Surface,Margin=Padding.Empty};
-  grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,112));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,190));
-  grid.RowStyles.Add(new RowStyle(SizeType.Percent,40));grid.RowStyles.Add(new RowStyle(SizeType.Percent,32));grid.RowStyles.Add(new RowStyle(SizeType.Percent,28));
+  grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,112));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,200));
+  grid.RowStyles.Add(new RowStyle(SizeType.Percent,34));grid.RowStyles.Add(new RowStyle(SizeType.Percent,44));grid.RowStyles.Add(new RowStyle(SizeType.Percent,22));
   var picture=new RoundPicture{Image=art,Dock=DockStyle.Fill,Margin=new Padding(0,0,12,0),Cursor=Cursors.Hand,AccessibleName="Sócio Premiado"};picture.Click+=(s,e)=>Open();grid.Controls.Add(picture,0,0);grid.SetRowSpan(picture,3);
   grid.Controls.Add(new Label{Text="Sócio Premiado",Font=new Font("Bahnschrift",15,FontStyle.Bold),ForeColor=DarkGreen,Dock=DockStyle.Fill,TextAlign=ContentAlignment.BottomLeft,AutoEllipsis=true},1,0);
-  grid.Controls.Add(new Label{Text="Ajude o projeto a evoluir: participe e concorra a prêmios.",ForeColor=Theme.Ink,Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleLeft,AutoEllipsis=true},1,1);
+  message=new Label{ForeColor=Theme.Ink,Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleLeft,AccessibleName="Situação da liberação"};grid.Controls.Add(message,1,1);
   var link=new LinkLabel{Text="sociopremiado.com.br",Dock=DockStyle.Fill,TextAlign=ContentAlignment.TopLeft,LinkColor=Green,ActiveLinkColor=DarkGreen,VisitedLinkColor=DarkGreen,LinkBehavior=LinkBehavior.HoverUnderline,AccessibleName="Abrir sociopremiado.com.br"};link.LinkClicked+=(s,e)=>Open();grid.Controls.Add(link,1,2);
-  var go=new ActionButton{Text="Ir para o site",BackColor=Green,ForeColor=Color.White,Width=176,Height=40,Anchor=AnchorStyles.Right,Margin=Padding.Empty};go.Click+=(s,e)=>Open();grid.Controls.Add(go,2,0);grid.SetRowSpan(go,3);
+  var buttons=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,Margin=Padding.Empty,BackColor=Theme.Surface};buttons.RowStyles.Add(new RowStyle(SizeType.Percent,50));buttons.RowStyles.Add(new RowStyle(SizeType.Percent,50));
+  var go=new ActionButton{Text="Ir para o site",BackColor=Green,ForeColor=Color.White,Width=186,Height=38,Anchor=AnchorStyles.Right,Margin=new Padding(0,4,0,2)};go.Click+=(s,e)=>Open();buttons.Controls.Add(go,0,0);
+  login=new ActionButton{Text="Entrar com minha conta",BackColor=Theme.Ink,ForeColor=Color.White,Width=186,Height=38,Anchor=AnchorStyles.Right,Margin=new Padding(0,2,0,4)};login.Click+=(s,e)=>License.Ensure(FindForm());buttons.Controls.Add(login,0,1);
+  grid.Controls.Add(buttons,2,0);grid.SetRowSpan(buttons,3);
   Controls.Add(grid);
+  refresh=()=>{if(IsDisposed)return;bool ok=License.Valid;message.Text=L.T(ok?"Central liberada"+(String.IsNullOrEmpty(License.Name)?"":" para "+License.Name)+". Obrigado por apoiar o projeto!":"Para jogar, faça uma compra de qualquer valor paga via Pix no site e entre com a mesma conta.");message.ForeColor=ok?DarkGreen:Theme.Ink;login.Visible=!ok;};
+  refresh();License.Changed+=refresh;
   Resize+=(s,e)=>Invalidate();
  }
  static void Open(){try{Process.Start(new ProcessStartInfo(Url){UseShellExecute=true});}catch{}}
@@ -31,7 +37,7 @@ public sealed class PromoCard : Panel {
   using(var path=Round(r,14))using(var fill=new SolidBrush(Theme.Surface))using(var pen=new Pen(Color.FromArgb(120,Green),1.5f)){e.Graphics.FillPath(fill,path);e.Graphics.DrawPath(pen,path);}
  }
  internal static GraphicsPath Round(Rectangle r,int radius){var p=new GraphicsPath();int d=radius*2;p.AddArc(r.X,r.Y,d,d,180,90);p.AddArc(r.Right-d,r.Y,d,d,270,90);p.AddArc(r.Right-d,r.Bottom-d,d,d,0,90);p.AddArc(r.X,r.Bottom-d,d,d,90,90);p.CloseFigure();return p;}
- protected override void Dispose(bool disposing){if(disposing&&art!=null)art.Dispose();base.Dispose(disposing);}
+ protected override void Dispose(bool disposing){if(disposing){License.Changed-=refresh;if(art!=null)art.Dispose();}base.Dispose(disposing);}
 }
 sealed class RoundPicture : Control {
  public Image Image;
