@@ -157,6 +157,49 @@ public static class ChatPhrases {
   new[]{"esse servidor e brasileiro?","e sim","finalmente um sem ping alto"},
   new[]{"vou dormir depois dessa","fala isso toda partida","dessa vez e serio"},
  };
+ // 0.5.33: assunto puxado por um bot e respondido por 2 ou 3 colegas (respostas sorteadas, sem ordem fixa).
+ public sealed class Talk{public string[] Open,Replies,Close;public Talk(string[] o,string[] r,string[] c=null){Open=o;Replies=r;Close=c;}}
+ public static readonly Talk[] Threads={
+  new Talk(new[]{"nao tem time nao ai?","cade o time, porra?","to sozinho nessa bandeira?","alguem do time ta vivo?"},
+   new[]{"to aqui, calma","tem nao, cada um por si","to nascendo, segura ai","to indo, 10 segundos","morri, foi mal","to no outro lado do mapa","time? que time?","to chegando pela {f}","segura que eu vou"},
+   new[]{"demorou hein","agora sim","valeu, chega logo"}),
+  new Talk(new[]{"quem ta de medico?","algum medico vivo?","preciso de revive aqui"},
+   new[]{"eu, ja vou","to de assalto, vou ai","to longe, se vira","eu mas to sem desfibrilador","ninguem joga de medico nesse time","segura ai que eu revivo"},
+   new[]{"vem logo","obrigado mano","esquece, ja dei respawn"}),
+  new Talk(new[]{"alguem tem municao?","to sem bala","joga uma caixa ai pelo amor"},
+   new[]{"to de suporte, vou jogar","acabou a minha tambem","pega do chao","to longe","joguei na {f}","usa a pistola kkk"},
+   new[]{"valeu","peguei, obrigado","vou de faca entao"}),
+  new Talk(new[]{"vamos atacar a {f} juntos?","bora todo mundo na {f}","quem vem comigo na {f}?"},
+   new[]{"bora","to dentro","vou pela direita","eu cubro de longe","vai que eu vou atras","nao, defende a nossa primeiro","to indo de carro","3 segundos"},
+   new[]{"bora entao","contando com voces","vai vai vai"}),
+  new Talk(new[]{"quem e o sniper que ta matando todo mundo?","tem um sniper safado na colina","sniper la no alto, alguem resolve"},
+   new[]{"vi ele, ta perto da {f}","deixa comigo","vou de fumaca","eu vi o brilho da luneta","ja morri pra ele duas vezes","alguem de tanque atira la"},
+   new[]{"pegaram ele?","ainda ta la","resolvido, valeu"}),
+  new Talk(new[]{"que time ruim, ninguem pega bandeira","o time ta todo de sniper","nosso time ta perdido"},
+   new[]{"fala menos e joga mais","eu to pegando, voce que nao ve","verdade","to tentando, porra","calma, da pra virar","pior que e verdade","olha quem fala"},
+   new[]{"entao bora","so reclamar nao adianta","vamo virar isso"}),
+  new Talk(new[]{"alguem tira esse tanque daqui?","tanque inimigo na {f}","esse tanque ta destruindo a gente"},
+   new[]{"vou de rpg","to de engenheiro, deixa comigo","joga c4 nele","ja dei dois tiros, falta pouco","alguem mira no traseiro dele","fugi dele kkk"},
+   new[]{"explodiu!","ainda ta vivo","boa, menos um"}),
+  new Talk(new[]{"cade o heli do nosso time?","quem pegou o helicoptero?","alguem pilota ai?"},
+   new[]{"caiu","eu peguei, ja vou","bateu no predio","o piloto e ruim","pega voce entao","to esperando nascer"},
+   new[]{"que piloto","ok","so faltava essa"}),
+  new Talk(new[]{"ta tendo lag ai?","alguem mais travando?","o servidor ta pesado"},
+   new[]{"aqui ta liso","um pouco","lag e desculpa","eu to com 300 de ping kkk","so na {f}","normal pra mim"},
+   new[]{"entao e meu pc","pelo menos nao sou so eu","ta"}),
+  new Talk(new[]{"quanto falta pra acabar?","quantos tickets eles tem?","ta perto de acabar?"},
+   new[]{"falta muito","olha o placar, ta feio","uns 200","se pegar a {f} a gente vira","nao sei, to morrendo"},
+   new[]{"bora entao","vixe","da tempo"}),
+  new Talk(new[]{"alguem sabe jogar de recon?","quem bota um beacon?","bota spawn perto da {f}"},
+   new[]{"eu boto","to de recon, ja vou","bota voce","coloquei atras do predio","o meu destruiram"},
+   new[]{"valeu","ja vi","nasce no beacon galera"}),
+  new Talk(new[]{"o {k} ta matando todo mundo","alguem segura o {k}?","o {k} nao morre"},
+   new[]{"ja tentei","vamo todo mundo nele","ele ta na {f}","report nele","deixa que eu pego","ele ta de hack, certeza","e skill, aceita"},
+   new[]{"bora pegar ele","marcado no mapa","um dia ele morre"}),
+ };
+ public static readonly string[] RageReply={"calma mano","eu tambem morri pra ele","joga junto que a gente pega ele","respira","acontece com todo mundo","kkkkk que fase",
+  "relaxa, ele vai cair","vem pro meu lado","ta acontecendo comigo tambem","para de correr sozinho","foi feio mesmo","chora nao"};
+ public static readonly string[] TauntReply={"kkkkkkk","humilhou","deixa ele chorar","essa doeu","kkkk ele nem viu","foi lindo","ta passando vergonha","print","que maldade kkk","respeita"};
 }
 public sealed class ChatBrain {
  // Team: 0 = geral (todos); >0 = só aquele time. Squad > 0 junto com Team = só aquele esquadrão.
@@ -168,7 +211,7 @@ public sealed class ChatBrain {
  public readonly HashSet<string> Humans=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
  public readonly Dictionary<string,int> Team=new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase),Squad=new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase);
  public int Level=2;
- DateTime lastSay=DateTime.MinValue,nextCasual=DateTime.MinValue,nextCallout=DateTime.MinValue,nextReport=DateTime.MinValue,nextVote=DateTime.MinValue,nextAi=DateTime.MinValue,nextTicket=DateTime.MinValue;
+ DateTime lastSay=DateTime.MinValue,nextCasual=DateTime.MinValue,nextCallout=DateTime.MinValue,nextReport=DateTime.MinValue,nextVote=DateTime.MinValue,nextAi=DateTime.MinValue,nextTicket=DateTime.MinValue,nextThread=DateTime.MinValue;
  readonly Dictionary<string,DateTime> lastBy=new Dictionary<string,DateTime>(StringComparer.OrdinalIgnoreCase);
  readonly Queue<string> recent=new Queue<string>();readonly HashSet<string> recentSet=new HashSet<string>();
  // Votação em andamento.
@@ -198,7 +241,8 @@ public sealed class ChatBrain {
   text=text.Replace("{f}",Flag(rnd));
   int team=0,squad=0,t=TeamOf(who);
   if(channel>0&&IsBot(who)&&HumanTeam(t)&&(channel==2||Chance(0.5))){team=t;int sq=SquadOf(who);if(sq>0&&Humans.Any(h=>TeamOf(h)==t&&SquadOf(h)==sq)&&Chance(0.5))squad=sq;}
-  queue.Add(new Line{At=at,Text=Format(who,text),Who=who,Team=team,Squad=squad});return true;
+  // 0.5.33: a cor por time não muda pelo RCON, então o time do jogador leva [TIME] antes do nome.
+  queue.Add(new Line{At=at,Text=Format((IsBot(who)&&HumanTeam(t)?"[TIME] ":"")+who,text),Who=who,Team=team,Squad=squad});return true;
  }
  void Commit(){lastSay=now()+Gap();}
  // Falas prontas para enviar agora.
@@ -226,14 +270,32 @@ public sealed class ChatBrain {
   if(vb&&!kb){MaybePraise(killer,victim);}
   if(kb&&!vb&&Chance(0.55*scale)){Say(killer,Fill(Pick(ChatPhrases.HumanTaunt),kk,vv,weapon,kc,null),rnd.Next(700,1600),0);Commit();return;}
   if(vb&&vd>=6&&vote==null&&now()>=nextVote&&Chance(0.3*scale)){StartVote(victim,TeamOf(victim),true,vd);return;}
-  if(vb&&vd>=3&&Chance(0.65*scale)){Say(victim,Fill(Pick(ChatPhrases.Rage),kk,vv,weapon,vd,null),rnd.Next(900,2200));Commit();MaybeReply(victim,killer);return;}
-  if(kb&&kc>=5&&kc%5==0&&Chance(0.75*scale)){Say(killer,Fill(Pick(ChatPhrases.Streak),kk,vv,weapon,kc,null),rnd.Next(700,1500));Commit();MaybeReply(killer,victim);return;}
+  if(vb&&vd>=3&&Chance(0.65*scale)){Say(victim,Fill(Pick(ChatPhrases.Rage),kk,vv,weapon,vd,null),rnd.Next(900,2200));Commit();MaybeReply(victim,killer,ChatPhrases.RageReply);return;}
+  if(kb&&kc>=5&&kc%5==0&&Chance(0.75*scale)){Say(killer,Fill(Pick(ChatPhrases.Streak),kk,vv,weapon,kc,null),rnd.Next(700,1500));Commit();MaybeReply(killer,victim,ChatPhrases.TauntReply);return;}
   if(headshot&&Chance(0.45*scale)){if(kb&&Chance(0.6))Say(killer,Fill(Pick(ChatPhrases.Headshot),kk,vv,weapon,kc,null),rnd.Next(700,1500));else if(vb)Say(victim,Fill(Pick(ChatPhrases.HeadshotVictim),kk,vv,weapon,vd,null),rnd.Next(900,2000));Commit();MaybeReply(vb?victim:killer,null);return;}
-  if(kb&&Chance(0.22*scale)){Say(killer,Fill(Pick(ChatPhrases.Taunt),kk,vv,weapon,kc,null),rnd.Next(700,1600));Commit();MaybeReply(killer,victim);return;}
-  if(vb&&Chance(0.16*scale)){Say(victim,Fill(Pick(ChatPhrases.Rage),kk,vv,weapon,vd,null),rnd.Next(900,2000));Commit();MaybeReply(victim,killer);}
+  if(kb&&Chance(0.22*scale)){Say(killer,Fill(Pick(ChatPhrases.Taunt),kk,vv,weapon,kc,null),rnd.Next(700,1600));Commit();MaybeReply(killer,victim,ChatPhrases.TauntReply);return;}
+  if(vb&&Chance(0.16*scale)){Say(victim,Fill(Pick(ChatPhrases.Rage),kk,vv,weapon,vd,null),rnd.Next(900,2000));Commit();MaybeReply(victim,killer,ChatPhrases.RageReply);}
  }
- void MaybeReply(string first,string mention){if(Level<2||!Chance(Level>=3?0.5:0.3))return;string who=OtherBot(first,mention);if(who!=null)Say(who,Pick(ChatPhrases.Reply),rnd.Next(2400,4000));
-  if(Level>=3&&Chance(0.25)){string third=OtherBot(first,mention,who);if(third!=null)Say(third,Pick(ChatPhrases.Reply),rnd.Next(4500,6500));}}
+ // 0.5.33: até 3 respostas seguidas, do mesmo time de quem falou, com frase que combina com o assunto.
+ void MaybeReply(string first,string mention,string[] pool=null){if(Level<2||!Chance(Level>=3?0.65:0.4))return;
+  int count=Level>=3?rnd.Next(1,4):rnd.Next(1,3);var used=new List<string>{first};if(mention!=null)used.Add(mention);int at=rnd.Next(2200,3600);
+  for(int i=0;i<count;i++){string who=BotOf(TeamOf(first),used.ToArray())??OtherBot(used.ToArray());if(who==null)break;used.Add(who);
+   Say(who,Pick(i==0&&pool!=null?pool:Chance(0.5)&&pool!=null?pool:ChatPhrases.Reply),at,1,true);at+=rnd.Next(1800,3200);}}
+ // Assunto puxado por um bot do time do jogador (ou qualquer um) e respondido por 2-3 colegas.
+ void StartThread(){
+  var th=ChatPhrases.Threads[rnd.Next(ChatPhrases.Threads.Length)];for(int g=0;g<8&&recentSet.Contains(th.Open[0]);g++)th=ChatPhrases.Threads[rnd.Next(ChatPhrases.Threads.Length)];
+  if(recentSet.Add(th.Open[0])){recent.Enqueue(th.Open[0]);while(recent.Count>90)recentSet.Remove(recent.Dequeue());}
+  var humanTeams=Humans.Select(TeamOf).Where(x=>x>0).Distinct().ToList();int team=humanTeams.Count>0&&Chance(0.7)?humanTeams[rnd.Next(humanTeams.Count)]:(Chance(0.5)?1:2);
+  string opener=BotOf(team);if(opener==null)return;
+  string target=kills.Where(p=>p.Value>=3&&TeamOf(p.Key)!=team).OrderByDescending(p=>p.Value).Select(p=>p.Key).FirstOrDefault();
+  if(th.Open[0].Contains("{k}")&&target==null)return;
+  Func<string,string> fill=s=>s.Replace("{k}",target??"");
+  lastBy.Remove(opener);Say(opener,fill(Pick(th.Open)),rnd.Next(300,800),2,true);
+  int n=Level>=3?rnd.Next(2,4):2,at=rnd.Next(2500,3800);var used=new List<string>{opener};
+  for(int i=0;i<n;i++){string who=BotOf(team,used.ToArray());if(who==null)break;used.Add(who);Say(who,fill(Pick(th.Replies)),at,2,true);at+=rnd.Next(1700,3200);}
+  if(th.Close!=null&&Chance(0.6)){lastBy.Remove(opener);Say(opener,Pick(th.Close),at+rnd.Next(800,1600),2,true);at+=1600;}
+  lastSay=now().AddMilliseconds(at+1500);
+ }
  // Colega de time do jogador comemora a kill dele (aparece no canal do time).
  void MaybePraise(string human,string victim){if(Level<2||!Chance(Level>=3?0.35:0.2))return;string mate=BotOf(TeamOf(human),victim);if(mate!=null)Say(mate,Fill(Pick(ChatPhrases.HumanKillPraise),human,victim,null,0,human),rnd.Next(1800,3200),2);}
  void Report(string target,string victim,int tk){
@@ -324,6 +386,8 @@ public sealed class ChatBrain {
     Commit();}
    return;
   }
+  if(nextThread==DateTime.MinValue)nextThread=t.AddSeconds(rnd.Next(15,30));
+  if(Level>=2&&t>=nextThread&&Ready()){nextThread=t.AddSeconds(Level>=3?rnd.Next(25,45):rnd.Next(50,80));StartThread();return;}
   if(Level<2||t<nextCasual||!Ready())return;nextCasual=t.AddSeconds(Level>=3?rnd.Next(35,60):rnd.Next(70,110));
   var talk=ChatPhrases.Casual[rnd.Next(ChatPhrases.Casual.Length)];for(int g=0;g<8&&recentSet.Contains(talk[0]);g++)talk=ChatPhrases.Casual[rnd.Next(ChatPhrases.Casual.Length)];
   if(recentSet.Add(talk[0])){recent.Enqueue(talk[0]);while(recent.Count>90)recentSet.Remove(recent.Dequeue());}

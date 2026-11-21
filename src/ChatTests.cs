@@ -16,7 +16,7 @@ public static class ChatTests {
    if(i%50==10)brain.OnScores(300,90);brain.Tick();t=t.AddSeconds(2);lines.AddRange(brain.DueLines());}
   var said=lines.Select(l=>l.Text).ToList();
   if(said.Count<120)throw new Exception("Chat: poucas falas ("+said.Count+")");
-  if(said.Any(l=>l.Length>127||!l.Contains(": ")||l.StartsWith("[")||l.Contains("{")))throw new Exception("Chat: fala mal formada: "+said.First(l=>l.Length>127||!l.Contains(": ")||l.StartsWith("[")||l.Contains("{")));
+  if(said.Any(l=>l.Length>127||!l.Contains(": ")||(l.StartsWith("[")&&!l.StartsWith("[TIME] "))||l.Contains("{")))throw new Exception("Chat: fala mal formada: "+said.First(l=>l.Length>127||!l.Contains(": ")||(l.StartsWith("[")&&!l.StartsWith("[TIME] "))||l.Contains("{")));
   if(said.Any(l=>l.StartsWith("Jogador:")))throw new Exception("Chat: falou em nome do jogador");
   if(said.Count>900)throw new Exception("Chat: falas demais ("+said.Count+")");
   // Denúncia, IA e votação aparecem quando o jogador domina a partida.
@@ -27,6 +27,11 @@ public static class ChatTests {
   if(!lines.Any(l=>l.Team==1))throw new Exception("Chat: time do jogador nunca usou o canal do time");
   if(!lines.Any(l=>l.Squad==1))throw new Exception("Chat: esquadrão do jogador nunca usou o canal do esquadrão");
   if(lines.Any(l=>l.Team==2))throw new Exception("Chat: time inimigo falou num canal que o jogador não vê");
+  // [TIME] só para bots do time do jogador (time 1).
+  foreach(var l in lines.Where(x=>x.Who!=null&&x.Who.StartsWith("Bot"))){int n=Int32.Parse(l.Who.Substring(3));bool ally=n%2==0;if(ally!=l.Text.StartsWith("[TIME] "))throw new Exception("Chat: [TIME] errado: "+l.Text);}
+  // Assunto em cadeia: alguém pergunta e 2+ colegas respondem em sequência.
+  bool chain=false;foreach(var th in ChatPhrases.Threads)foreach(var o in th.Open){int i=said.FindIndex(x=>x.EndsWith(": "+o));if(i<0)continue;int rc=said.Skip(i+1).Take(6).Count(x=>th.Replies.Any(rp=>x.Contains(": "+rp.Replace("{f}","").Split(' ')[0])));if(rc>=2)chain=true;}
+  if(!chain)throw new Exception("Chat: nenhuma conversa com 2+ respostas");
   // Repetição: na mesma janela de 30 falas, quase nada pode se repetir (fora "1"/"2" da votação e risadas curtas).
   int rep=0;for(int i=0;i<said.Count;i++){var body=said[i].Substring(said[i].IndexOf(": ")+2);if(body.Length<6)continue;for(int j=Math.Max(0,i-30);j<i;j++)if(said[j].EndsWith(": "+body)){rep++;break;}}
   if(rep*10>said.Count)throw new Exception("Chat: repetição alta ("+rep+" de "+said.Count+")");
