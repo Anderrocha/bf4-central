@@ -43,8 +43,19 @@ public static class ChatTests {
   if(!r.Any(l=>l.StartsWith(ChatBrain.VoteName+":")))throw new Exception("Chat: votação aberta não encerrou");
   if(!r.Any(l=>l.Contains("Jogador")))throw new Exception("Chat: voto do jogador não foi comentado");
   brain.OnChat("Jogador","gg time","all");t=t.AddSeconds(4);var reply=brain.Due();
-  brain.OnRoundOver(1);for(int i=0;i<40;i++){t=t.AddSeconds(1);reply.AddRange(brain.Due());}
+  // Fim de partida: resumo com o placar real e silêncio de combate depois.
+  brain.SetScore("Bot4",101,12);brain.SetScore("Jogador",40,22);brain.SetScore("Bot7",3,30);brain.SetScore("Bot4",0,0);
+  brain.OnRoundOver(1);for(int i=0;i<40;i++){t=t.AddSeconds(1);brain.Tick();reply.AddRange(brain.Due());}
   if(reply.Count<8)throw new Exception("Chat: fim de rodada/resposta sem falas");
+  if(!reply.Any(l=>l.Contains("Bot4")&&l.Contains("101")))throw new Exception("Chat: resumo sem o mvp e as kills reais");
+  if(!reply.Any(l=>l.Contains("Jogador")&&(l.Contains("40")||l.Contains("22"))))throw new Exception("Chat: resumo sem o jogador de verdade");
+  var after=new List<string>();for(int i=0;i<120;i++){t=t.AddSeconds(1);brain.Tick();brain.OnScores(500,10);after.AddRange(brain.Due());}
+  if(after.Count>0)throw new Exception("Chat: falou de combate depois do fim da partida: "+after[0]);
+  // Mapa fechado (Locker): nada de tanque, heli, carro...
+  var lk=new ChatBrain(11,()=>t){Level=3,Map="MP_Prison"};lk.SetPlayers(team,new[]{"Jogador"},squads);var lks=new List<string>();
+  for(int i=0;i<600;i++){lk.OnKill("Bot"+(i%5*2),"Bot"+(i%5*2+1),"U_AWS",i%7==0);if(i%3==0)lk.OnKill("Jogador","Bot"+(i%4*2+1),"U_AK12",false);lk.Tick();t=t.AddSeconds(2);lks.AddRange(lk.Due());}
+  var veh=lks.FirstOrDefault(l=>ChatPhrases.Vehicle.IsMatch(l.Substring(l.IndexOf(": ")+2)));if(veh!=null)throw new Exception("Chat: veículo no Locker: "+veh);
+  lk.OnLevelLoaded("MP_Prison");if(lk.RoundOver)throw new Exception("Chat: nova partida não voltou a conversar");
   var off=new ChatBrain(1,()=>t){Level=0};off.SetPlayers(team,new[]{"Jogador"});for(int i=0;i<50;i++){off.OnKill("Bot1","Bot2","x",true);off.OnKill("Jogador","Bot2","x",true);off.OnRoundOver(1);off.Tick();}
   if(off.Pending>0)throw new Exception("Chat: falou com intensidade desligada");
   var all=typeof(ChatPhrases).GetFields().Where(f=>f.FieldType==typeof(string[])).SelectMany(f=>(string[])f.GetValue(null)).Concat(ChatPhrases.Casual.SelectMany(x=>x)).ToList();

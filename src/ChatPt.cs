@@ -197,6 +197,16 @@ public static class ChatPhrases {
    new[]{"ja tentei","vamo todo mundo nele","ele ta na {f}","report nele","deixa que eu pego","ele ta de hack, certeza","e skill, aceita"},
    new[]{"bora pegar ele","marcado no mapa","um dia ele morre"}),
  };
+ // 0.5.34: resumo do fim da partida com o placar real (listPlayers / server.onRoundOverPlayers).
+ public static readonly string[] SumTop={"mvp da partida: {p} com {k} kills e {d} mortes","{p} fez {k} kills e morreu {d} vezes, monstro","{k} kills do {p}, quem para esse cara?",
+  "{p} carregou: {k}/{d}","respeita o {p}, {k} kills nessa partida","{p} {k} kills e {d} mortes, absurdo"};
+ public static readonly string[] SumHumanGood={"{h} fez {k} kills e {d} mortes, respeito","{h} jogou muito, {k}/{d}","{k} kills do {h}, tava on hoje","gg {h}, {k} kills e so {d} mortes"};
+ public static readonly string[] SumHumanBad={"{h} morreu {d} vezes kkkk","{h}, {k} kills e {d} mortes... proxima melhora","{h} foi adubo hoje: {d} mortes","gg {h}, {k}/{d}, da pra melhorar"};
+ public static readonly string[] SumWorst={"{p} morreu {d} vezes, alguem ensina ele","{d} mortes do {p}, doou pontos pro outro time","{p} com {k}/{d}, desinstala","coitado do {p}: {d} mortes"};
+ public static readonly string[] SumTeam={"{p} foi o melhor do nosso time com {k} kills","{p} segurou o time, {k} kills","destaque do time: {p}, {k}/{d}"};
+ // Palavras de veiculo: fora em mapas so de infantaria (Locker, Metro, Pearl Market, Propaganda).
+ public static readonly System.Text.RegularExpressions.Regex Vehicle=new System.Text.RegularExpressions.Regex(@"tanque|heli|jet|carro|piloto|pilota|rpg|stinger|c4|capot|aviao|quadric",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+ public static readonly HashSet<string> InfantryMaps=new HashSet<string>(StringComparer.OrdinalIgnoreCase){"MP_Prison","XP0_Metro","XP3_MarketPl","XP3_Prpganda"};
  public static readonly string[] RageReply={"calma mano","eu tambem morri pra ele","joga junto que a gente pega ele","respira","acontece com todo mundo","kkkkk que fase",
   "relaxa, ele vai cair","vem pro meu lado","ta acontecendo comigo tambem","para de correr sozinho","foi feio mesmo","chora nao"};
  public static readonly string[] TauntReply={"kkkkkkk","humilhou","deixa ele chorar","essa doeu","kkkk ele nem viu","foi lindo","ta passando vergonha","print","que maldade kkk","respeita"};
@@ -212,6 +222,10 @@ public sealed class ChatBrain {
  public readonly Dictionary<string,int> Team=new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase),Squad=new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase);
  public int Level=2;
  DateTime lastSay=DateTime.MinValue,nextCasual=DateTime.MinValue,nextCallout=DateTime.MinValue,nextReport=DateTime.MinValue,nextVote=DateTime.MinValue,nextAi=DateTime.MinValue,nextTicket=DateTime.MinValue,nextThread=DateTime.MinValue;
+ public string Map="";bool roundOver;
+ public readonly Dictionary<string,int[]> Score=new Dictionary<string,int[]>(StringComparer.OrdinalIgnoreCase);
+ bool Infantry{get{return ChatPhrases.InfantryMaps.Contains(Map??"");}}
+ public bool RoundOver{get{return roundOver;}}
  readonly Dictionary<string,DateTime> lastBy=new Dictionary<string,DateTime>(StringComparer.OrdinalIgnoreCase);
  readonly Queue<string> recent=new Queue<string>();readonly HashSet<string> recentSet=new HashSet<string>();
  // Votação em andamento.
@@ -223,7 +237,7 @@ public sealed class ChatBrain {
  TimeSpan Gap(){int a=Level>=3?2000:Level==2?4000:12000,b=Level>=3?4500:Level==2?8000:20000;return TimeSpan.FromMilliseconds(rnd.Next(a,b));}
  bool Chance(double p){return rnd.NextDouble()<p;}
  // Sorteia evitando as ~90 frases usadas por último (o chat antigo repetia demais).
- string Pick(string[] list){string s=list[rnd.Next(list.Length)];for(int i=0;i<12&&recentSet.Contains(s);i++)s=list[rnd.Next(list.Length)];
+ string Pick(string[] list){if(Infantry){var ok=list.Where(x=>!ChatPhrases.Vehicle.IsMatch(x)).ToArray();if(ok.Length>0)list=ok;}string s=list[rnd.Next(list.Length)];for(int i=0;i<12&&recentSet.Contains(s);i++)s=list[rnd.Next(list.Length)];
   if(recentSet.Add(s)){recent.Enqueue(s);while(recent.Count>90)recentSet.Remove(recent.Dequeue());}return s;}
  public bool IsBot(string name){return !String.IsNullOrEmpty(name)&&!Humans.Contains(name)&&name!=VoteName&&name!=AiName;}
  int TeamOf(string n){int t;return n!=null&&Team.TryGetValue(n,out t)?t:0;}
@@ -255,6 +269,7 @@ public sealed class ChatBrain {
  int Enemy(int team){return team==1?2:team==2?1:0;}
  public void OnKill(string killer,string victim,string weapon,bool headshot){
   if(String.IsNullOrEmpty(victim))return;
+  roundOver=false;
   int d;deaths.TryGetValue(victim,out d);deaths[victim]=d+1;kills[victim]=0;
   int kc=0,tk=0;bool self=String.IsNullOrEmpty(killer)||String.Equals(killer,victim,StringComparison.OrdinalIgnoreCase);
   if(!self){kills.TryGetValue(killer,out kc);kills[killer]=++kc;deaths[killer]=0;total.TryGetValue(killer,out tk);total[killer]=++tk;}
@@ -283,7 +298,8 @@ public sealed class ChatBrain {
    Say(who,Pick(i==0&&pool!=null?pool:Chance(0.5)&&pool!=null?pool:ChatPhrases.Reply),at,1,true);at+=rnd.Next(1800,3200);}}
  // Assunto puxado por um bot do time do jogador (ou qualquer um) e respondido por 2-3 colegas.
  void StartThread(){
-  var th=ChatPhrases.Threads[rnd.Next(ChatPhrases.Threads.Length)];for(int g=0;g<8&&recentSet.Contains(th.Open[0]);g++)th=ChatPhrases.Threads[rnd.Next(ChatPhrases.Threads.Length)];
+  var pool=ChatPhrases.Threads.Where(x=>!Infantry||!ChatPhrases.Vehicle.IsMatch(x.Open[0])).ToArray();
+  var th=pool[rnd.Next(pool.Length)];for(int g=0;g<8&&recentSet.Contains(th.Open[0]);g++)th=pool[rnd.Next(pool.Length)];
   if(recentSet.Add(th.Open[0])){recent.Enqueue(th.Open[0]);while(recent.Count>90)recentSet.Remove(recent.Dequeue());}
   var humanTeams=Humans.Select(TeamOf).Where(x=>x>0).Distinct().ToList();int team=humanTeams.Count>0&&Chance(0.7)?humanTeams[rnd.Next(humanTeams.Count)]:(Chance(0.5)?1:2);
   string opener=BotOf(team);if(opener==null)return;
@@ -356,7 +372,7 @@ public sealed class ChatBrain {
  }
  // Placar (tickets) lido a cada ~30 s: o time que perde cobra, o que ganha provoca.
  public void OnScores(float a,float b){
-  if(Level<2||now()<nextTicket||!Ready())return;float hi=Math.Max(a,b),lo=Math.Min(a,b);if(hi<=0||hi-lo<Math.Max(60f,hi*0.2f))return;
+  if(roundOver||Level<2||now()<nextTicket||!Ready())return;float hi=Math.Max(a,b),lo=Math.Min(a,b);if(hi<=0||hi-lo<Math.Max(60f,hi*0.2f))return;
   int lose=a<b?1:2;bool loser=Chance(0.6);string who=BotOf(loser?lose:Enemy(lose));if(who==null)return;
   Say(who,Pick(loser?ChatPhrases.TicketLose:ChatPhrases.TicketWin).Replace("{n}",((int)(hi-lo)).ToString()),rnd.Next(500,1500),2);Commit();
   nextTicket=now().AddSeconds(Level>=3?70:120);
@@ -364,16 +380,35 @@ public sealed class ChatBrain {
  public void OnRoundOver(int winner){
   vote=null;
   if(Level<=0)return;int count=Level>=3?14:Level==2?8:3;var bots=Team.Where(p=>IsBot(p.Key)).ToList();if(bots.Count==0)return;
-  int delay=1200;
+  roundOver=true;queue.RemoveAll(l=>l.Who!=VoteName&&l.Who!=AiName);
+  int delay=Summary(winner,1200);
   for(int i=0;i<count;i++){bool win=i%2==0;var side=bots.Where(p=>(p.Value==winner)==win).ToList();if(side.Count==0)continue;var who=side[rnd.Next(side.Count)].Key;
    lastBy.Remove(who);Say(who,Pick(win?ChatPhrases.Winner:ChatPhrases.Loser),delay,0,true);delay+=rnd.Next(700,1300);}
   lastSay=now().AddMilliseconds(delay+20000);deaths.Clear();kills.Clear();total.Clear();reports.Clear();
+ }
+ // Nova partida/mapa: zera o placar guardado e volta a conversar.
+ public void OnLevelLoaded(string map){if(!String.IsNullOrEmpty(map))Map=map;roundOver=false;Score.Clear();deaths.Clear();kills.Clear();total.Clear();reports.Clear();vote=null;nextCasual=DateTime.MinValue;}
+ // Placar do servidor (kills, mortes). Guarda o maior visto: no fim da rodada o servidor pode zerar antes da leitura.
+ public void SetScore(string name,int k,int d){int[] old;if(Score.TryGetValue(name,out old)&&old[0]+old[1]>k+d)return;Score[name]=new[]{k,d};}
+ // Resumo com numeros reais: mvp, jogador de verdade, pior do servidor e destaque do time vencedor.
+ int Summary(int winner,int delay){
+  var rows=Score.Where(p=>Team.ContainsKey(p.Key)&&p.Value[0]+p.Value[1]>0).ToList();if(rows.Count==0)return delay;
+  Func<string,string,int[],string> F=(text,who,v)=>text.Replace("{p}",who).Replace("{h}",who).Replace("{k}",v[0].ToString()).Replace("{d}",v[1].ToString());
+  var top=rows.OrderByDescending(p=>p.Value[0]).ThenBy(p=>p.Value[1]).First();
+  string sp=OtherBot(top.Key);if(sp!=null){lastBy.Remove(sp);Say(sp,F(Pick(ChatPhrases.SumTop),top.Key,top.Value),delay,0,true);delay+=rnd.Next(1500,2500);}
+  foreach(var h in rows.Where(p=>Humans.Contains(p.Key))){string b=OtherBot(h.Key,sp);if(b==null)break;bool good=h.Value[0]>=h.Value[1];lastBy.Remove(b);
+   Say(b,F(Pick(good?ChatPhrases.SumHumanGood:ChatPhrases.SumHumanBad),h.Key,h.Value),delay,0,true);delay+=rnd.Next(1500,2500);}
+  var worst=rows.Where(p=>p.Key!=top.Key).OrderByDescending(p=>p.Value[1]).ThenBy(p=>p.Value[0]).FirstOrDefault();
+  if(worst.Key!=null&&worst.Value[1]>=5&&Level>=2){string b=OtherBot(worst.Key);if(b!=null){lastBy.Remove(b);Say(b,F(Pick(ChatPhrases.SumWorst),worst.Key,worst.Value),delay,0,true);delay+=rnd.Next(1500,2500);}}
+  if(Level>=3){var best=rows.Where(p=>TeamOf(p.Key)==winner&&p.Key!=top.Key).OrderByDescending(p=>p.Value[0]).FirstOrDefault();
+   if(best.Key!=null){string b=BotOf(winner,best.Key);if(b!=null){lastBy.Remove(b);Say(b,F(Pick(ChatPhrases.SumTeam),best.Key,best.Value),delay,0,true);delay+=rnd.Next(1500,2500);}}}
+  return delay;
  }
  // Conversa à toa, chamadas táticas e recado para o jogador, de tempos em tempos.
  public void Tick(){
   var t=now();
   if(vote!=null&&t>=vote.Ends)CloseVote();
-  if(Level<1)return;
+  if(Level<1||roundOver)return;
   if(nextCasual==DateTime.MinValue){nextCasual=t.AddSeconds(rnd.Next(25,50));nextCallout=t.AddSeconds(rnd.Next(10,20));return;}
   if(Level>=2&&t>=nextCallout&&Ready()){
    nextCallout=t.AddSeconds(Level>=3?rnd.Next(12,22):rnd.Next(25,40));
@@ -451,7 +486,7 @@ public static class ChatPt {
   say.Command("admin.say",line.Text,"all");
  }
  static void Scores(ChatBrain brain,Rcon say){
-  try{var w=say.Command("serverInfo");int n;if(w.Length<10||!Int32.TryParse(w[8],out n)||n<2||w.Length<9+n)return;float a,b;
+  try{var w=say.Command("serverInfo");if(w.Length>5)brain.Map=w[5];int n;if(w.Length<10||!Int32.TryParse(w[8],out n)||n<2||w.Length<9+n)return;float a,b;
    if(Single.TryParse(w[9],System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out a)&&Single.TryParse(w[10],System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out b))brain.OnScores(a,b);}
   catch(InvalidOperationException){}
  }
@@ -460,19 +495,27 @@ public static class ChatPt {
   switch(w[0]){
    case "player.onKill":if(w.Length>=5)brain.OnKill(w[1],w[2],w[3],w[4]=="true");break;
    case "player.onChat":if(w.Length>=3)brain.OnChat(w[1],w[2],w.Length>3?w[3]:"all");break;
+   case "server.onLevelLoaded":if(w.Length>=2)brain.OnLevelLoaded(w[1]);break;
+   case "server.onRoundOverPlayers":ReadInfo(brain,w,1,false);break;
    case "server.onRoundOver":{int team;Players(brain,say);if(w.Length>=2&&Int32.TryParse(w[1],out team))brain.OnRoundOver(team);break;}
    case "player.onJoin":case "player.onLeave":case "player.onTeamChange":case "player.onSquadChange":Players(brain,say);break;
   }
  }
  // Bot = sem GUID e ping 65535 (como o mod mostra no placar); o resto é jogador de verdade.
  static void Players(ChatBrain brain,Rcon say){
-  var p=say.Command("listPlayers","all");int n;if(p.Length<3||!Int32.TryParse(p[1],out n)||n<1)return;var cols=p.Skip(2).Take(n).ToList();int count;if(!Int32.TryParse(p[2+n],out count))return;
+  ReadInfo(brain,say.Command("listPlayers","all"),1,true);
+ }
+ // Bloco de jogadores do BF4 (listPlayers ou server.onRoundOverPlayers): numero de colunas, colunas, numero de linhas, linhas.
+ static void ReadInfo(ChatBrain brain,string[] p,int at,bool roster){
+  int n;if(p.Length<at+2||!Int32.TryParse(p[at],out n)||n<1)return;var cols=p.Skip(at+1).Take(n).ToList();int count;if(p.Length<at+2+n||!Int32.TryParse(p[at+1+n],out count))return;
+  int iKills=cols.IndexOf("kills"),iDeaths=cols.IndexOf("deaths");
   int iName=cols.IndexOf("name"),iGuid=cols.IndexOf("guid"),iTeam=cols.IndexOf("teamId"),iSquad=cols.IndexOf("squadId"),iPing=cols.IndexOf("ping");if(iName<0)return;
   var team=new List<KeyValuePair<string,int>>();var squads=new List<KeyValuePair<string,int>>();var humans=new List<string>();
-  for(int r=0;r<count;r++){int b=3+n+r*n;if(b+n>p.Length)break;string name=p[b+iName];int t=0,sq=0;if(iTeam>=0)Int32.TryParse(p[b+iTeam],out t);if(iSquad>=0)Int32.TryParse(p[b+iSquad],out sq);
+  for(int r=0;r<count;r++){int b=at+2+n+r*n;if(b+n>p.Length)break;string name=p[b+iName];int t=0,sq=0;
+   int k,d;if(iKills>=0&&iDeaths>=0&&Int32.TryParse(p[b+iKills],out k)&&Int32.TryParse(p[b+iDeaths],out d))brain.SetScore(name,k,d);if(iTeam>=0)Int32.TryParse(p[b+iTeam],out t);if(iSquad>=0)Int32.TryParse(p[b+iSquad],out sq);
    team.Add(new KeyValuePair<string,int>(name,t));squads.Add(new KeyValuePair<string,int>(name,sq));
    bool bot=(iGuid<0||p[b+iGuid]=="")&&(iPing<0||p[b+iPing]=="65535");if(!bot)humans.Add(name);}
-  brain.SetPlayers(team,humans,squads);
+  if(roster)brain.SetPlayers(team,humans,squads);
  }
  static string[] Ask(NetworkStream s,uint id,params string[] words){var b=Rcon.Encode(id,words);s.Write(b,0,b.Length);for(int i=0;i<64;i++){uint f;var r=Read(s,out f);if(r==null)throw new IOException("conexão encerrada");if((f&0x40000000)!=0&&(f&0x3fffffff)==id)return r;}throw new IOException("sem resposta ao comando");}
  static string[] Read(NetworkStream s,out uint flags){flags=0;var h=Exact(s,12);if(h==null)return null;uint size=BitConverter.ToUInt32(h,4);if(size<12||size>2*1024*1024)throw new InvalidDataException("pacote RCON fora do limite");var body=Exact(s,(int)size-12);if(body==null)return null;flags=BitConverter.ToUInt32(h,0);return Rcon.Decode(h.Concat(body).ToArray());}
